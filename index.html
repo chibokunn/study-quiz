@@ -1,0 +1,1405 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="theme-color" content="#2C5568" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#12171E" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="テスト対策">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%F0%9F%93%9D%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+<title>テスト対策 4択クイズ</title>
+
+<style>
+  :root {
+    --paper:#F5F4EF; --surface:#FFFFFF; --surface2:#FAFAF7; --edge:#DCDAD1;
+    --ink:#1A2029; --ink-soft:#5C6470; --ink-faint:#8A9099;
+    --accent:#2C5568; --accent-dim:#E3EAEC;
+    --marker:#B8901A; --marker-dim:#F7EDCC;
+    --ok:#3D7458; --ok-dim:#E4EFE8;
+    --ng:#A44A3A; --ng-dim:#F6E5E1;
+    --shadow:0 1px 2px rgba(26,32,41,.06), 0 8px 24px -12px rgba(26,32,41,.18);
+    --font-ui:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic",Meiryo,sans-serif;
+    --font-term:"Hiragino Mincho ProN","Yu Mincho",YuMincho,"Noto Serif JP",serif;
+    --font-num:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --tap:48px;   /* 指で確実に押せる最小の高さ */
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper:#12171E; --surface:#1A212A; --surface2:#1F2731; --edge:#2C3540;
+      --ink:#E6E8E5; --ink-soft:#9AA3AD; --ink-faint:#6B747E;
+      --accent:#7FB3C8; --accent-dim:#21323B;
+      --marker:#D9B441; --marker-dim:#37301A;
+      --ok:#6BAE87; --ok-dim:#1D2E25;
+      --ng:#D08272; --ng-dim:#33201C;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="light"] {
+    --paper:#F5F4EF; --surface:#FFFFFF; --surface2:#FAFAF7; --edge:#DCDAD1;
+    --ink:#1A2029; --ink-soft:#5C6470; --ink-faint:#8A9099;
+    --accent:#2C5568; --accent-dim:#E3EAEC; --marker:#B8901A; --marker-dim:#F7EDCC;
+    --ok:#3D7458; --ok-dim:#E4EFE8; --ng:#A44A3A; --ng-dim:#F6E5E1;
+    --shadow:0 1px 2px rgba(26,32,41,.06), 0 8px 24px -12px rgba(26,32,41,.18);
+  }
+  :root[data-theme="dark"] {
+    --paper:#12171E; --surface:#1A212A; --surface2:#1F2731; --edge:#2C3540;
+    --ink:#E6E8E5; --ink-soft:#9AA3AD; --ink-faint:#6B747E;
+    --accent:#7FB3C8; --accent-dim:#21323B; --marker:#D9B441; --marker-dim:#37301A;
+    --ok:#6BAE87; --ok-dim:#1D2E25; --ng:#D08272; --ng-dim:#33201C;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.6);
+  }
+
+  * { box-sizing:border-box; }
+
+  body {
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:var(--font-ui); font-size:17px; line-height:1.7;
+    -webkit-text-size-adjust:100%;
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  .wrap {
+    max-width:44rem; margin:0 auto;
+    padding:0 1rem calc(7rem + env(safe-area-inset-bottom));
+    display:flex; flex-direction:column; gap:.9rem;
+  }
+
+  /* ------------------------------ ヘッダー ------------------------------ */
+  header {
+    position:sticky; top:0; z-index:20;
+    background:color-mix(in srgb, var(--paper) 94%, transparent);
+    backdrop-filter:blur(10px); border-bottom:1px solid var(--edge);
+    margin:0 -1rem; padding:.5rem 1rem .45rem;
+    display:flex; flex-direction:column; gap:.5rem;
+  }
+  .brand { display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
+  .brand h1 {
+    margin:0; font-family:var(--font-term); font-size:1.05rem; font-weight:600;
+    letter-spacing:.04em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .views { display:flex; gap:.35rem; flex:0 0 auto; }
+  .views button {
+    border:1px solid var(--edge); background:var(--surface); color:var(--ink-soft);
+    font-family:inherit; font-size:.85rem; font-weight:600;
+    padding:.4rem .9rem; min-height:44px; border-radius:7px; cursor:pointer;
+    touch-action:manipulation;
+  }
+  .views button[aria-pressed="true"] { background:var(--ink); border-color:var(--ink); color:var(--paper); }
+
+  .tabs {
+    display:flex; gap:.4rem; overflow-x:auto; scrollbar-width:none;
+    padding-bottom:.2rem; margin:0 -1rem; padding-left:1rem; padding-right:1rem;
+    -webkit-overflow-scrolling:touch;
+  }
+  .tabs::-webkit-scrollbar { display:none; }
+  .tab {
+    flex:0 0 auto; border:1px solid var(--edge); background:var(--surface); color:var(--ink-soft);
+    font-family:inherit; font-size:.9rem; font-weight:600;
+    padding:.5rem .9rem; min-height:42px; border-radius:999px; cursor:pointer;
+    display:flex; align-items:center; gap:.45rem; white-space:nowrap;
+    transition:background .12s, color .12s, border-color .12s;
+  }
+  .tab[aria-selected="true"] { background:var(--accent); border-color:var(--accent); color:var(--paper); }
+  .tab .cnt { font-family:var(--font-num); font-size:.72rem; opacity:.8; font-variant-numeric:tabular-nums; }
+
+  .memo {
+    margin:0; font-size:.8rem; line-height:1.7; color:var(--ink-soft);
+    background:var(--accent-dim); border-left:3px solid var(--accent);
+    border-radius:0 5px 5px 0; padding:.65rem .85rem;
+  }
+
+  /* ------------------------------ 進捗 ------------------------------ */
+  .status { display:flex; align-items:center; gap:.7rem; font-size:.8rem; color:var(--ink-soft); }
+  .status .mode {
+    font-size:.75rem; font-weight:600; color:var(--accent);
+    border:1px solid var(--accent-dim); background:var(--accent-dim);
+    padding:.2rem .6rem; border-radius:4px; white-space:nowrap;
+  }
+  .status .mode.fix { color:var(--ng); background:var(--ng-dim); border-color:var(--ng-dim); }
+  .bar { flex:1; height:4px; background:var(--edge); border-radius:2px; overflow:hidden; }
+  .bar i { display:block; height:100%; width:0; background:var(--accent); transition:width .3s ease; }
+  .status .count { font-family:var(--font-num); font-variant-numeric:tabular-nums; font-size:.8rem; white-space:nowrap; }
+
+  /* ------------------------------ 問題カード ------------------------------ */
+  .card {
+    background:var(--surface); border:1px solid var(--edge); border-radius:10px;
+    box-shadow:var(--shadow); padding:1.1rem 1rem 1.2rem;
+    display:flex; flex-direction:column; gap:1rem;
+  }
+  .card.flagged { border-left:4px solid var(--marker); }
+  .card.blank { border-left:4px solid var(--accent); }
+  .card.blank.flagged { border-left-color:var(--marker); }
+  .card-head {
+    display:flex; justify-content:space-between; align-items:center; gap:.6rem;
+    font-size:.72rem; color:var(--ink-faint); letter-spacing:.04em;
+  }
+  .flagchip { color:var(--marker); background:var(--marker-dim); padding:.18rem .5rem; border-radius:4px; white-space:nowrap; font-weight:600; }
+  .blankchip { color:var(--paper); background:var(--accent); padding:.18rem .5rem; border-radius:4px; white-space:nowrap; margin-right:.5rem; font-weight:700; letter-spacing:.08em; }
+
+  .plabel { font-size:.75rem; letter-spacing:.1em; color:var(--ink-faint); margin-bottom:.4rem; }
+  .term {
+    font-family:var(--font-term); font-size:1.75rem; line-height:1.45;
+    font-weight:600; letter-spacing:.02em; text-wrap:balance; margin:0;
+  }
+  .meaning { font-size:1.05rem; line-height:1.85; margin:0; }
+
+  /* ------------------------------ 4択 ------------------------------ */
+  .choices { display:flex; flex-direction:column; gap:.65rem; }
+  .choice {
+    display:flex; align-items:center; gap:.8rem; text-align:left; width:100%;
+    min-height:3.6rem;
+    border:1.5px solid var(--edge); background:var(--surface2); color:var(--ink);
+    font-family:inherit; font-size:1rem; line-height:1.6;
+    padding:.85rem .9rem; border-radius:9px; cursor:pointer;
+    transition:border-color .12s, background .12s, transform .08s;
+    touch-action:manipulation;
+  }
+  .choice:active:not(:disabled) { transform:scale(.985); background:var(--accent-dim); }
+  .choice:disabled { cursor:default; }
+  .choice .no {
+    flex:0 0 auto; font-family:var(--font-num); font-size:.85rem; font-weight:600;
+    color:var(--ink-faint); border:1.5px solid var(--edge); border-radius:6px;
+    width:1.9rem; height:1.9rem; display:flex; align-items:center; justify-content:center;
+  }
+  .choice .body { flex:1; min-width:0; }
+  .choice .body.t { font-family:var(--font-term); font-size:1.15rem; font-weight:600; }
+  .choice.correct { border-color:var(--ok); background:var(--ok-dim); }
+  .choice.correct .no { border-color:var(--ok); color:var(--ok); }
+  .choice.picked-wrong { border-color:var(--ng); background:var(--ng-dim); }
+  .choice.picked-wrong .no { border-color:var(--ng); color:var(--ng); }
+  .choice .mark { flex:0 0 auto; font-size:.75rem; font-weight:700; white-space:nowrap; }
+  .choice.correct .mark { color:var(--ok); }
+  .choice.picked-wrong .mark { color:var(--ng); }
+
+  /* ------------------------------ 答え ------------------------------ */
+  .after {
+    display:flex; flex-direction:column; gap:.75rem;
+    border-top:1px solid var(--edge); padding-top:1rem; animation:rise .2s ease;
+  }
+  @keyframes rise { from { opacity:0; transform:translateY(4px); } }
+  @media (prefers-reduced-motion: reduce) {
+    .after { animation:none; } .bar i { transition:none; } .choice { transition:none; }
+  }
+  .after .full { font-size:.95rem; line-height:1.8; color:var(--ink-soft); }
+  .after .full b { font-family:var(--font-term); color:var(--ink); font-size:1.1rem; }
+  .note {
+    font-size:.86rem; color:var(--marker); background:var(--marker-dim);
+    border-radius:6px; padding:.6rem .8rem; line-height:1.65;
+  }
+
+  /* ------------------------------ ボタン ------------------------------ */
+  button.btn {
+    font-family:inherit; border:1.5px solid var(--accent); background:var(--accent); color:var(--paper);
+    font-size:1rem; font-weight:700; padding:.75rem 1.3rem; min-height:var(--tap);
+    border-radius:9px; cursor:pointer; touch-action:manipulation;
+    transition:transform .08s, background .12s;
+  }
+  button.btn:active { transform:scale(.985); }
+  button.btn-quiet {
+    font-family:inherit; border:1.5px solid var(--edge); background:var(--surface); color:var(--ink-soft);
+    font-size:.88rem; font-weight:600; padding:.6rem 1rem; min-height:44px;
+    border-radius:8px; cursor:pointer; touch-action:manipulation;
+    transition:transform .08s, border-color .12s, color .12s;
+  }
+  button.btn-quiet:active { transform:scale(.985); border-color:var(--accent); color:var(--accent); }
+  button:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+
+  /* マウス環境でだけホバーを効かせる（タップ後に色が残るのを防ぐ） */
+  @media (hover: hover) {
+    .tab:hover { border-color:var(--accent); }
+    .choice:hover:not(:disabled) { border-color:var(--accent); }
+    button.btn:hover { background:color-mix(in srgb, var(--accent) 85%, var(--ink)); }
+    button.btn-quiet:hover { border-color:var(--accent); color:var(--accent); }
+  }
+
+  /* --------------------- 画面下に固定する「次へ」 --------------------- */
+  .actionbar {
+    position:fixed; left:0; right:0; bottom:0; z-index:40;
+    background:color-mix(in srgb, var(--paper) 95%, transparent);
+    backdrop-filter:blur(12px); border-top:1px solid var(--edge);
+    padding:.65rem 1rem calc(.65rem + env(safe-area-inset-bottom));
+  }
+  .actionbar .inner { max-width:44rem; margin:0 auto; display:flex; gap:.7rem; align-items:center; }
+  .actionbar .btn { flex:1; }
+  .actionbar .hint { flex:0 0 auto; }
+
+  /* ------------------------------ ツールバー ------------------------------ */
+  .toolbar {
+    display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; justify-content:space-between;
+    border-top:1px solid var(--edge); padding-top:.9rem;
+  }
+  .toolbar .group { display:flex; gap:.5rem; flex-wrap:wrap; }
+
+  .hint { font-size:.76rem; color:var(--ink-faint); line-height:1.65; }
+  .hint kbd {
+    font-family:var(--font-num); font-size:.7rem; border:1px solid var(--edge);
+    border-bottom-width:2px; border-radius:4px; padding:0 .3rem; background:var(--surface);
+  }
+  @media (hover: none) { .hint.keys { display:none; } }
+
+  /* ------------------------------ 終了画面 ------------------------------ */
+  .done {
+    background:var(--surface); border:1px solid var(--edge); border-radius:10px;
+    padding:1.6rem 1.1rem; text-align:center; display:flex; flex-direction:column; gap:1.1rem;
+    box-shadow:var(--shadow);
+  }
+  .done h2 { font-family:var(--font-term); font-size:1.3rem; margin:0; font-weight:600; }
+  .score { font-family:var(--font-num); font-size:3rem; font-weight:700; line-height:1; font-variant-numeric:tabular-nums; }
+  .score small { font-size:1rem; font-weight:400; color:var(--ink-faint); }
+  .donebtns { display:flex; gap:.6rem; flex-wrap:wrap; justify-content:center; }
+  .donebtns .btn, .donebtns .btn-quiet { flex:1 1 auto; min-width:12rem; }
+
+  /* ------------------------------ 分析 ------------------------------ */
+  .panel {
+    background:var(--surface); border:1px solid var(--edge); border-radius:10px;
+    padding:1.1rem 1rem; display:flex; flex-direction:column; gap:.9rem; box-shadow:var(--shadow);
+  }
+  .panel h2 { margin:0; font-size:1rem; font-family:var(--font-term); font-weight:600; letter-spacing:.03em; }
+  .panel h2 .sub { font-weight:400; font-size:.75rem; color:var(--ink-faint); font-family:var(--font-ui); margin-left:.5rem; }
+  .rows { display:flex; flex-direction:column; gap:.7rem; }
+  .row { display:grid; grid-template-columns:1fr auto; gap:.25rem .8rem; align-items:baseline; font-size:.9rem; }
+  .row .lbl { min-width:0; overflow-wrap:anywhere; }
+  .row .lbl .q { font-family:var(--font-term); font-weight:600; }
+  .row .val { font-family:var(--font-num); font-variant-numeric:tabular-nums; font-size:.82rem; color:var(--ink-soft); white-space:nowrap; }
+  .row .track { grid-column:1 / -1; height:5px; background:var(--edge); border-radius:3px; overflow:hidden; }
+  .row .track i { display:block; height:100%; }
+  .row .sub { grid-column:1 / -1; font-size:.78rem; color:var(--ink-faint); }
+  .row .sub em { font-style:normal; color:var(--ng); font-weight:600; }
+
+  .sev-ok i { background:var(--ok); }
+  .sev-mid i { background:var(--marker); }
+  .sev-bad i { background:var(--ng); }
+
+  .pill { display:inline-block; font-size:.72rem; font-weight:600; padding:.12rem .5rem; border-radius:4px; white-space:nowrap; }
+  .pill.bad { color:var(--ng); background:var(--ng-dim); }
+  .pill.mid { color:var(--marker); background:var(--marker-dim); }
+  .pill.ok { color:var(--ok); background:var(--ok-dim); }
+
+  .empty { font-size:.88rem; color:var(--ink-faint); }
+
+  textarea {
+    width:100%; min-height:10rem; resize:vertical;
+    font-family:var(--font-num); font-size:.8rem; line-height:1.7;
+    padding:.8rem; border:1.5px solid var(--edge); border-radius:8px;
+    background:var(--surface2); color:var(--ink);
+  }
+  textarea:focus-visible { outline:3px solid var(--accent); outline-offset:1px; }
+  .copied { font-size:.82rem; color:var(--ok); font-weight:700; align-self:center; }
+
+  .hidden { display:none !important; }
+
+  /* ------------------------------ 画面が狭いとき ------------------------------ */
+  @media (max-width: 30rem) {
+    body { font-size:16px; }
+    .wrap { padding-left:.8rem; padding-right:.8rem; }
+    header { margin:0 -.8rem; padding-left:.8rem; padding-right:.8rem; }
+    .tabs { margin:0 -.8rem; padding-left:.8rem; padding-right:.8rem; }
+    .term { font-size:1.5rem; }
+    .meaning { font-size:1rem; }
+    .choice { font-size:.97rem; padding:.8rem .75rem; gap:.65rem; }
+    .choice .body.t { font-size:1.1rem; }
+    .card { padding:1rem .85rem 1.1rem; }
+    .toolbar { justify-content:stretch; }
+    .toolbar .group { flex:1 1 100%; }
+    .toolbar .group .btn-quiet { flex:1 1 auto; }
+    .donebtns .btn, .donebtns .btn-quiet { min-width:100%; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <h1 id="deckTitle">テスト対策</h1>
+      <div class="views">
+        <button id="vQuiz" aria-pressed="true">出題</button>
+        <button id="vStats" aria-pressed="false">分析</button>
+      </div>
+    </div>
+    <div class="tabs" id="tabs" role="tablist"></div>
+  </header>
+
+  <p class="memo hidden" id="deckMemo"></p>
+
+  <!-- ============ 出題ビュー ============ -->
+  <div id="quizView" style="display:flex;flex-direction:column;gap:1rem">
+
+    <div class="status">
+      <span class="mode" id="modeLabel"></span>
+      <div class="bar"><i id="barFill"></i></div>
+      <span class="count" id="counter"></span>
+    </div>
+
+    <section id="stage" class="card">
+      <div class="card-head">
+        <span><span class="blankchip hidden" id="cardBlank">空欄</span><span id="cardSrc"></span></span>
+        <span class="flagchip hidden" id="cardFlag">要確認</span>
+      </div>
+
+      <div>
+        <div class="plabel" id="promptLabel"></div>
+        <p class="term hidden" id="promptTerm"></p>
+        <p class="meaning hidden" id="promptMeaning"></p>
+      </div>
+
+      <div class="choices" id="choices"></div>
+
+      <div class="after hidden" id="after">
+        <div class="full" id="fullAnswer"></div>
+        <div class="note hidden" id="noteBox"></div>
+      </div>
+    </section>
+
+    <section id="doneBox" class="done hidden">
+      <h2 id="doneTitle"></h2>
+      <div class="score" id="doneScore"></div>
+      <p class="hint" id="doneHint"></p>
+      <div class="donebtns">
+        <button class="btn" id="fixBtn">まちがいだけやり直す</button>
+        <button class="btn-quiet" id="againBtn">もう一周</button>
+        <button class="btn-quiet" id="toStatsBtn">分析を見る</button>
+      </div>
+    </section>
+
+    <div class="toolbar">
+      <div class="group">
+        <button class="btn-quiet" id="blankModeBtn">空欄だけ</button>
+        <button class="btn-quiet" id="fixModeBtn">まちがい直し</button>
+        <button class="btn-quiet" id="allModeBtn">全部から出題</button>
+      </div>
+      <div class="group">
+        <button class="btn-quiet" id="resetBtn">この科目の記録を消す</button>
+      </div>
+    </div>
+
+    <p class="hint keys"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> で選択　<kbd>Enter</kbd> で次へ</p>
+  </div>
+
+  <!-- ============ 分析ビュー ============ -->
+  <div id="statsView" class="hidden" style="display:flex;flex-direction:column;gap:1rem">
+
+    <section class="panel">
+      <h2>科目ごとの手ごたえ<span class="sub">解いた分だけが対象</span></h2>
+      <div class="rows" id="bySubject"></div>
+    </section>
+
+    <section class="panel">
+      <h2>取り違えやすい組み合わせ<span class="sub">どれをどれと間違えたか</span></h2>
+      <div class="rows" id="confusions"></div>
+      <p class="empty hidden" id="confEmpty">まだ取り違えの記録がない。何問か解くとここに出る。</p>
+    </section>
+
+    <section class="panel">
+      <h2>落としている用語<span class="sub">間違えた回数の多い順</span></h2>
+      <div class="rows" id="weakTerms"></div>
+      <p class="empty hidden" id="weakEmpty">まだ間違いの記録がない。</p>
+    </section>
+
+    <section class="panel">
+      <h2>弱い単元<span class="sub">回・テーマごとの正答率</span></h2>
+      <div class="rows" id="bySrc"></div>
+      <p class="empty hidden" id="srcEmpty">まだデータがない。</p>
+    </section>
+
+    <section class="panel">
+      <h2>Claudeに解説してもらう<span class="sub">下の文をコピーして貼るだけ</span></h2>
+      <p class="hint">間違えた問題と取り違えの傾向をまとめた文を作る。Claudeに貼ると、区別の決め手とテストでの見分け方を説明してくれる。</p>
+      <div class="group" style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <button class="btn" id="genBtn">この科目の弱点でつくる</button>
+        <button class="btn-quiet" id="genAllBtn">全科目まとめてつくる</button>
+        <span class="copied hidden" id="copiedMsg">コピーした</span>
+      </div>
+      <textarea id="promptOut" readonly placeholder="ボタンを押すとここに文ができる"></textarea>
+      <div class="group" style="display:flex;gap:.5rem">
+        <button class="btn-quiet" id="copyBtn">コピー</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>要確認の項目<span class="sub">答えの確度が低いもの</span></h2>
+      <p class="hint">スライドの記述だけでは断定しきれなかった項目。授業ノートか先生に当たって直すこと。</p>
+      <div class="rows" id="flagList"></div>
+      <p class="empty hidden" id="flagEmpty">この科目に要確認の項目はない。</p>
+    </section>
+  </div>
+
+  <p class="hint">記録はこの端末のブラウザに保存される。</p>
+</div>
+
+<div class="actionbar hidden" id="actionBar">
+  <div class="inner">
+    <button class="btn" id="nextBtn">次へ</button>
+    <span class="hint keys">または <kbd>Enter</kbd></span>
+  </div>
+</div>
+
+<script>
+/* ==========================================================================
+   カードデータ
+   dir "term"    … 説明を見せて【用語】を4択で選ばせる
+   dir "meaning" … 用語を見せて【意味】を4択で選ばせる
+   t 用語 / m 意味 / src 出典 / cf 混同しやすい用語（誤答選択肢に優先採用）
+   warn 答えの確度が低い / note 補足
+   ========================================================================== */
+const DECKS = [
+  {
+    id: "chosa", name: "社会調査法", dir: "meaning",
+    cards: [
+      { t:"社会調査", m:"一定の社会または社会集団における社会事象を、主として現地調査によって直接観察し、記述・分析する過程のこと。", src:"第1回 イントロダクション", cf:["実験"] },
+      { t:"実験", m:"諸条件を厳密に統制し、人為的に特定の場面を設定して人びとの行動を観察する方法。社会調査が「ありのまま」を見るのと対比される。", src:"第1回 イントロダクション", cf:["社会調査"] },
+      { t:"学術調査", m:"認識それ自体を目的とする社会調査のこと。目的による分類の1つ。", src:"第1回 社会調査の分類", cf:["市場調査","世論調査","統計調査"] },
+      { t:"市場調査", m:"経済的利益を得ることを目的とする社会調査のこと。マーケティング・リサーチともいう。", src:"第1回 社会調査の分類", cf:["学術調査","世論調査","統計調査"] },
+      { t:"世論調査", m:"公共的利益を目的として、マスコミなどが行う社会調査のこと。", src:"第1回 社会調査の分類", cf:["学術調査","市場調査","統計調査"] },
+      { t:"統計調査", m:"国や地方行政機関が公共的利益を目的として行う調査のこと。国勢調査・労働力調査・就業構造基本調査など。", src:"第1回 社会調査の分類", cf:["世論調査","学術調査","市場調査"] },
+      { t:"調査公害", m:"被災者などに対して複数の調査者が同じような調査を繰り返し行い、対象者に過度な負担をかけて問題化した事態のこと。調査地被害ともいう。", src:"第1回 調査されるという迷惑", cf:["社会調査"] },
+
+      { t:"グラウンデッド・セオリー・アプローチ", m:"聞き取り内容を文字化したテクストなど、データに根ざして理論を構築していく質的調査の方法。GTAと略される。", src:"第2回 質的調査の特徴", cf:["ラポール","参与観察"] },
+      { t:"ラポール", m:"調査者が調査対象者との間に良好な信頼関係をつくること。質的調査で重視される。", src:"第2回 質的調査の特徴", cf:["グラウンデッド・セオリー・アプローチ","調査員バイアス"] },
+      { t:"横断的調査", m:"単一の母集団に対して行う1回限りの調査。最も基本的な調査デザイン。クロスセクション調査ともいう。", src:"第2回 調査のデザイン", cf:["繰り返し調査","比較調査","パネル調査"] },
+      { t:"繰り返し調査", m:"複数母集団に対して複数時点で繰り返して行う調査。時点ごとに標本を抽出し直すので、たいてい異なる個人が対象になる。世論調査や政党支持率調査など。", src:"第2回 調査のデザイン", cf:["パネル調査","横断的調査","比較調査"] },
+      { t:"比較調査", m:"横断的調査を複数母集団でそれぞれ1回ずつ行う調査。国際比較調査など。", src:"第2回 調査のデザイン", cf:["繰り返し調査","横断的調査","パネル調査"] },
+      { t:"パネル調査", m:"単一の母集団から1回だけ標本を抽出し、その同じ標本に対して複数時点で反復して行う調査。同一個人の変化を追える。", src:"第2回 調査のデザイン", cf:["繰り返し調査","横断的調査","比較調査"] },
+      { t:"縦断的調査", m:"複数時点で調査を行い、変化をみることを目的とする調査の総称。繰り返し調査とパネル調査がこれにあたる。", src:"第2回 調査のデザイン", cf:["横断的調査","パネル調査"] },
+      { t:"パネル", m:"パネル調査において、反復して調査される同一の標本のこと。", src:"第2回 調査のデザイン", cf:["標本","母集団"] },
+
+      { t:"リサーチ・クエスチョン", m:"研究の「問い」のこと。テーマではなく問いの形をとり、社会学的で社会的意義があり、検証できるデータが入手できることが求められる。", src:"第3回 社会調査のデザイン", cf:["仮説","理論仮説","作業仮説"] },
+      { t:"記述的な問い", m:"「どのように〇〇なのか？」という形のリサーチ・クエスチョンのこと。", src:"第3回 社会調査のデザイン", cf:["説明的な問い"] },
+      { t:"説明的な問い", m:"「なぜ〇〇なのか？」という形のリサーチ・クエスチョンのこと。因果関係を問う。", src:"第3回 社会調査のデザイン", cf:["記述的な問い"] },
+      { t:"仮説", m:"問いに対する自分なりの仮の答え。量的調査では「Xの変化に伴ってYも変化する」という形をとる。", src:"第3回 仮説の構築", cf:["リサーチ・クエスチョン","理論仮説","作業仮説"] },
+      { t:"変数", m:"XやYのように変化する値のこと。", src:"第3回 仮説の構築", cf:["独立変数","従属変数","統制変数"] },
+      { t:"独立変数", m:"従属変数を説明する変数、原因にあたる変数のこと。説明変数ともいう。仮説のXにあたる。", src:"第3回 仮説の構築", cf:["従属変数","統制変数","変数"] },
+      { t:"従属変数", m:"何らかの原因から影響を受ける変数、結果にあたる変数のこと。被説明変数ともいう。仮説のYにあたる。", src:"第3回 仮説の構築", cf:["独立変数","統制変数","変数"] },
+      { t:"因果関係の3条件", m:"①XとYに媒介変数を介さない相関がある②原因Xが結果Yより時間的に先行している③XとY双方に影響する変数Zを統制してもXがYに影響する、の3つ。", src:"第3回 因果関係", cf:["疑似相関","相関"] },
+      { t:"疑似相関", m:"XとYの双方に影響を与える別の変数があるために生じている、見せかけの関連のこと。", src:"第3回 因果関係", cf:["因果関係の3条件","統制変数","相関"] },
+      { t:"統制変数", m:"XとYの双方に影響を与えうるために、分析上その影響を取り除く対象とする変数Zのこと。コントロール変数ともいう。", src:"第3回 因果関係", cf:["独立変数","従属変数","疑似相関"] },
+      { t:"変数による統制", m:"統制変数の値をそろえたうえでXとYの関係を比べる作業のこと。疑似相関かどうかを確かめる、量的研究の王道。", src:"第3回 因果関係", cf:["統制変数","疑似相関"] },
+      { t:"理論仮説", m:"より抽象的で、社会学的な背景をもつ仮説のこと。構成概念のレベルで立てられる。", src:"第3回 理論仮説と作業仮説", cf:["作業仮説","対立仮説","仮説"] },
+      { t:"作業仮説", m:"より具体的で、観察可能なレベルまで落とし込まれた仮説のこと。1つの理論仮説からいくつも作られる。", src:"第3回 理論仮説と作業仮説", cf:["理論仮説","対立仮説","仮説"] },
+      { t:"対立仮説", m:"相反する内容の2つ以上の説のうち、どちらが正しいかを検証するために立てる、もとの仮説と反対の仮説のこと。", src:"第3回 仮説検証のパターン", cf:["理論仮説","作業仮説"] },
+      { t:"概念の操作化", m:"抽象的な構成概念を、観察・測定できる操作概念に置き換えること。", src:"第3回 測定の信頼性・妥当性", cf:["構成概念妥当性","理論仮説","作業仮説"] },
+      { t:"構成概念妥当性", m:"操作概念が、もとの構成概念を適切に測定できているかどうかのこと。", src:"第3回 測定の信頼性・妥当性", cf:["概念の操作化"] },
+
+      { t:"選択バイアス", m:"研究対象に選ばれたものと選ばれなかったものとの間の特性の差によって生じる誤差のこと。標本の偏りから生じる。", src:"第5回 実査の方法", cf:["調査員バイアス","標本誤差","非標本誤差"] },
+      { t:"回収率", m:"配布した調査票のうち回収できた割合のこと。60％以上が理想とされる。", src:"第5回 実査の方法", cf:["有効回収率"] },
+      { t:"他記式調査", m:"調査票に基づいて調査員が調査対象者に質問し、調査員が回答を記入する方式のこと。個別面接法・電話法がこれにあたる。", src:"第5回 実査の方法", cf:["自記式調査"] },
+      { t:"自記式調査", m:"調査対象者自らが調査票に回答を記入する方式のこと。留置法・郵送法・集合法・インターネット調査がこれにあたる。", src:"第5回 実査の方法", cf:["他記式調査"] },
+      { t:"個別面接法", m:"被調査者の自宅を訪問し、調査者が質問して調査者が記入する方法。回収率が最も高く誤記入を避けられるが、コストが最も大きい。構造化面接ともいう。", src:"第5回 実査の方法", cf:["留置法","電話法","集合法"] },
+      { t:"調査員バイアス", m:"調査者が目の前にいることが回答に影響を与えることによる偏りのこと。", src:"第5回 実査の方法", cf:["選択バイアス","メイキング"] },
+      { t:"電話法", m:"電話番号の名簿を用いて対象者に電話をかけ、口頭で質問して調査者が記入する方法。コストが小さく短期間で実施できるが、標本設計が難しく複雑な質問が使えない。", src:"第5回 実査の方法", cf:["RDD調査","個別面接法"] },
+      { t:"RDD調査", m:"コンピュータでランダムに発生させた電話番号にかけて行う電話調査のこと。名簿が不要な反面、固定電話をもつ在宅時間の長い中高年に標本が偏る。", src:"第5回 実査の方法", cf:["電話法","単純無作為抽出"] },
+      { t:"留置法", m:"被調査者の自宅を訪問して調査票を手渡し、1〜2週間後に再訪問して回収する方法。回収率が高く面接調査よりコストが小さいが、誤記入や本人以外の記入がありうる。", src:"第5回 実査の方法", cf:["郵送法","個別面接法","集合法"] },
+      { t:"郵送法", m:"対象者の住所に調査票を郵送し、一定期間後に返送してもらう方法。コストが小さく調査者バイアスがないが、回収率が低く標本が偏りやすい。", src:"第5回 実査の方法", cf:["留置法","集合法","インターネット法"] },
+      { t:"集合法", m:"対象者が特定の場所に集合し、その場で調査票に回答する方法。コストが最も小さく回収率はほぼ100％だが、無作為抽出になっていないため推測統計学を適用できない。", src:"第5回 実査の方法", cf:["郵送法","留置法","個別面接法"] },
+      { t:"インターネット法", m:"インターネット上で調査票を提示し対象者が回答を入力する方法。コストが非常に小さいが、最大の問題点は母集団が明確でないという代表性の問題。", src:"第5回 実査の方法", cf:["郵送法","集合法","オンラインパネル"] },
+      { t:"オンラインパネル", m:"インターネット調査で対象となる、調査モニターに登録した人々のこと。", src:"第5回 実査の方法", cf:["インターネット法","パネル"] },
+      { t:"メイキング", m:"調査員による意図的なデータのねつ造のこと。", src:"第5回 調査員の管理", cf:["代理回答","無効票","監査"] },
+      { t:"監査", m:"回答者に調査員訪問の事実を確認したり、調査員に活動記録の提出を求めたりして、調査員の活動を点検すること。", src:"第5回 調査員の管理", cf:["メイキング","エディティング"] },
+
+      { t:"ワーディング", m:"質問文や選択肢の言葉遣いのこと。言葉の正しい定義よりも「その言葉で多くの人は何を思い浮かべるか」が重要になる。", src:"第6回 調査票の作成", cf:["ダブルバーレル質問","キャリーオーバー効果"] },
+      { t:"ダブルバーレル質問", m:"1つの質問文に2つ以上の論点が含まれている質問のこと。andやorで結んだ重文、becauseで結んだ複文が典型。", src:"第6回 ワーディング", cf:["誘導質問","黙従傾向","キャリーオーバー効果"] },
+      { t:"黙従傾向", m:"ある意見を示して賛否を尋ねると「賛成」が多くなる傾向のこと。両論併記にすることで避ける。", src:"第6回 ワーディング", cf:["キャリーオーバー効果","選択肢順効果","ダブルバーレル質問"] },
+      { t:"キャリーオーバー効果", m:"前の質問の内容が後の質問の回答に影響を与えてしまうこと。質問の配置・順序を考慮して避ける。", src:"第6回 ワーディング", cf:["選択肢順効果","黙従傾向","ダブルバーレル質問"] },
+      { t:"選択肢順効果", m:"選択肢の並び順が回答に影響すること。自記式では最初の方、他記式では最後の方の選択肢が選ばれやすい。", src:"第6回 ワーディング", cf:["キャリーオーバー効果","黙従傾向"] },
+      { t:"フェイスシート", m:"年齢・性別・婚姻状態など、集計目的で設けられた個人属性の質問のこと。", src:"第6回 質問の配置", cf:["スクリーニング質問","プリ・コーディング"] },
+      { t:"スクリーニング質問", m:"回答者をふるい分けるために置く質問のこと。", src:"第6回 質問の内容", cf:["フェイスシート"] },
+      { t:"プリ・コーディング", m:"選択肢を作成する段階で、あらかじめすべての選択肢に数値を振っておくこと。", src:"第6回 質問形式", cf:["アフターコーディング","コーディング"] },
+      { t:"相互排他的かつ網羅的", m:"選択肢を作るときの原則。重複がなく、かつすべての場合を尽くしていること。網羅できない場合は「その他」を置く。", src:"第6回 質問形式", cf:["プリ・コーディング"] },
+      { t:"単項選択", m:"選択肢から1つだけ選ぶ回答形式のこと。", src:"第6回 質問形式", cf:["多項選択","程度選択","順位選択"] },
+      { t:"程度選択", m:"5件法などで程度を1つ選ぶ回答形式のこと。", src:"第6回 質問形式", cf:["単項選択","多項選択","順位選択"] },
+      { t:"多項選択", m:"あてはまるものをいくつでも選ぶ回答形式のこと。マルチアンサーともいい、分析しにくい。", src:"第6回 質問形式", cf:["単項選択","順位選択","程度選択"] },
+      { t:"順位選択", m:"1番目・2番目と順位をつけて選ばせる回答形式のこと。最も分析しにくいため、できるだけ使わない。", src:"第6回 質問形式", cf:["多項選択","単項選択","程度選択"] },
+
+      { t:"全数調査", m:"調査対象となる領域に属するすべての個体について調査を行う方法。悉皆調査ともいう。国勢調査が代表例。", src:"第8回 サンプリング", cf:["標本調査","有意抽出"] },
+      { t:"標本調査", m:"調査対象となる領域から一定数の個体を抽出して調査する方法。標本のデータから母集団の性質を推論・一般化する。", src:"第8回 サンプリング", cf:["全数調査","無作為抽出"] },
+      { t:"母集団", m:"調査対象となるべき単位を網羅した集合のこと。その数をNで表す。", src:"第8回 サンプリング", cf:["標本","標本抽出枠","パネル"] },
+      { t:"標本", m:"母集団すべてを調査できない場合に、調査対象として取り出す一部分のこと。その数（標本の大きさ）をnで表す。", src:"第8回 サンプリング", cf:["母集団","標本抽出枠","パネル"] },
+      { t:"有意抽出", m:"調査者が何らかの基準で母集団をよく代表すると思われる個体を選び出す方法。非確率抽出ともいい、学生が行う調査はほとんどこれ。", src:"第8回 サンプリング", cf:["無作為抽出","割当抽出法","便宜抽出法"] },
+      { t:"目的抽出法", m:"母集団の平均に近いと考えられる最も典型的なケースを選んでいく有意抽出の方法。", src:"第8回 サンプリング", cf:["便宜抽出法","機縁法","割当抽出法"] },
+      { t:"便宜抽出法", m:"街で偶然出会った人を対象に、目的のサンプル数になるまで集める有意抽出の方法。", src:"第8回 サンプリング", cf:["目的抽出法","機縁法","割当抽出法"] },
+      { t:"機縁法", m:"知り合いの伝手をたどって雪だるま式に標本を得る有意抽出の方法。スノーボールサンプリングともいう。", src:"第8回 サンプリング", cf:["便宜抽出法","目的抽出法","割当抽出法"] },
+      { t:"割当抽出法", m:"母集団を属性グループに分け、各グループから母集団の構成比に応じた数の標本を抽出する方法。有意抽出だが調査者の思い込みに左右されにくい。", src:"第8回 サンプリング", cf:["層化抽出","目的抽出法","便宜抽出法"], note:"層化抽出との違いに注意。割当抽出は各層の中を無作為に選ばないが、層化抽出は無作為抽出を使う。" },
+      { t:"無作為抽出", m:"母集団に含まれるすべての人が同じ確率（n/N）で抽出されるように標本を選ぶ方法。確率抽出ともいう。", src:"第8回 サンプリング", cf:["有意抽出","単純無作為抽出","割当抽出法"] },
+      { t:"単純無作為抽出", m:"母集団全構成者のリストに番号を付け、乱数を用いて必要な標本サイズだけランダムに抽出する方法。現実には名簿が揃わず実施困難なことが多い。", src:"第8回 サンプリング", cf:["無作為抽出","系統抽出","層化多段無作為抽出"] },
+      { t:"乱数表", m:"規則性のないランダムな数列からなる表のこと。", src:"第8回 サンプリング", cf:["単純無作為抽出","系統抽出"] },
+      { t:"標本誤差", m:"標本から母集団の数値を推定するときに生じる、まったくの偶然による誤差。真の値と調査結果との差のこと。無作為抽出なら推測統計学で客観的に推測できる。", src:"第8回 サンプリング", cf:["非標本誤差","カバレッジ誤差","選択バイアス"] },
+      { t:"非標本誤差", m:"全数調査でも標本調査でも生じる、調査過程での誤差。標本の偏り・単純ミス・回答の偏りなど。客観的に推測することは困難。", src:"第8回 サンプリング", cf:["標本誤差","カバレッジ誤差"] },
+      { t:"カバレッジ誤差", m:"標本抽出枠のカバーの不足や過剰による歪みのこと。代表的な非標本誤差。名簿に載っていない人が対象から漏れるなど。", src:"第8回 サンプリング", cf:["非標本誤差","標本抽出枠","標本誤差"] },
+      { t:"標本抽出枠", m:"標本抽出を行うための名簿・リストのこと。選挙人名簿、住民基本台帳、電話帳など。", src:"第8回 サンプリング", cf:["カバレッジ誤差","母集団"] },
+      { t:"正規分布", m:"左右対称で、平均が中心で最も高く、左右になだらかに下がっていく分布のこと。無作為抽出された標本の分布は理論的にこれをとる。", src:"第8回 サンプリング", cf:["標本誤差"] },
+      { t:"層化多段無作為抽出", m:"地点を層化抽出し、地点から個人へと多段抽出し、地点内で系統抽出を行う方法。社会調査における実際的な無作為抽出法。", src:"第8回 サンプリング", cf:["多段抽出","層化抽出","系統抽出"] },
+      { t:"多段抽出", m:"まず地域を抽出し、次にその地域から個人を抽出するというように、段階を分けて抽出する方法。抽出の手間とコストを大幅に減らせる。", src:"第8回 サンプリング", cf:["層化抽出","系統抽出","層化多段無作為抽出"] },
+      { t:"確率比例抽出", m:"地点ごとの住人の数に比例した確率で地点を抽出し、各地点からは等しい人数を抽出する方法。地点ごとの調査負担が均等になる。", src:"第8回 サンプリング", cf:["等確率抽出","多段抽出"] },
+      { t:"等確率抽出", m:"地点は等確率で抽出し、その地点からの抽出数を住人の数に応じて変える方法。地点ごとの調査負担が不均等になる。", src:"第8回 サンプリング", cf:["確率比例抽出","多段抽出"] },
+      { t:"系統抽出", m:"乱数を1回だけ引いてスタート番号を決め、あとは一定のインターバルで等間隔に抽出する方法。等間隔抽出ともいう。", src:"第8回 サンプリング", cf:["単純無作為抽出","層化抽出","多段抽出"] },
+      { t:"インターバル", m:"系統抽出において、母集団の総数を調査対象数で割って求める抽出間隔のこと。", src:"第8回 サンプリング", cf:["系統抽出"] },
+      { t:"層化抽出", m:"既知の情報で母集団を層に分け、各層から母集団の層構成比に応じた数の標本を無作為抽出する方法。標準誤差を小さくして代表性を高める。", src:"第8回 サンプリング", cf:["割当抽出法","多段抽出","系統抽出"], note:"割当抽出法との違いは、層の中を無作為に抽出するかどうか。" },
+
+      { t:"エディティング", m:"誤記入・記入漏れ・矛盾する回答を点検する作業のこと。方針を定めたエディティングガイドを作り作業者で共有する。", src:"データファイルの作成", cf:["コーディング","データクリーニング","アフターコーディング"] },
+      { t:"論理エラー", m:"未婚なのに配偶者がいると答えているなど、論理的に成立しない回答のこと。", src:"データファイルの作成", cf:["無効票","欠損値"] },
+      { t:"欠損値", m:"訂正できない回答を処理するための値。無回答（NA）には9・99・999を、非該当には8・98・998をあてる。", src:"データファイルの作成", cf:["非該当","無効票","論理エラー"] },
+      { t:"非該当", m:"そもそもその質問に答える対象でないこと。無回答とは区別してコーディングする。", src:"データファイルの作成", cf:["欠損値","無効票"] },
+      { t:"無効票", m:"ほとんど白紙、同じ番号ばかりに○がついているなど、実質的な回答が得られていない調査票のこと。", src:"データファイルの作成", cf:["代理回答","メイキング","有効回収率"] },
+      { t:"代理回答", m:"調査対象者以外の人が回答すること。", src:"データファイルの作成", cf:["メイキング","無効票"] },
+      { t:"ナンバリング", m:"チェック後に有効とみなされた票に通し番号を割り振ること。", src:"データファイルの作成", cf:["有効回収率","コーディング"] },
+      { t:"有効回収率", m:"有効票数を配布票数で割った値のこと。", src:"データファイルの作成", cf:["回収率","ナンバリング"] },
+      { t:"アフターコーディング", m:"自由回答方式の回答やその他の回答を、調査後に分類して数値化する作業のこと。大変な労力が必要なので、極力必要ない設計にする。", src:"データファイルの作成", cf:["プリ・コーディング","エディティング","コーディング"] },
+      { t:"コードブック", m:"設問・回答カテゴリー・コード・変数名の対応関係を示した一覧表のこと。作業者で共有し必要に応じて更新する。", src:"データファイルの作成", cf:["アフターコーディング","プリ・コーディング"] },
+      { t:"ケース", m:"データファイルにおける調査対象の単位のこと。個人など。表の2行目以降に入力される。", src:"データファイルの作成", cf:["変数","値"] },
+      { t:"データクリーニング", m:"度数分布表やクロス集計を出力して、選択肢にない数字や論理エラーがないかを確認し修正する作業のこと。修正記録を残す。", src:"データファイルの作成", cf:["エディティング","論理エラー","アフターコーディング"] }
+    ]
+  },
+  {
+    id: "shakai", name: "社会学入門", dir: "meaning",
+    cards: [
+      { t:"社会学", m:"世界を理論的視座と社会調査によって読み解き、人間の生活や考え方を、個人の心理ではなく社会環境や制度に基づいて研究する学問。", src:"第1回 イントロダクション" },
+      { t:"社会調査", m:"一定の社会または社会集団における社会事象を、主として現地調査によって、直接観察し、記述および分析する過程。", src:"第1回 イントロダクション" },
+      { t:"リサーチリテラシー", m:"調査結果を批判的に読むための能力のこと。", src:"第1回 イントロダクション" },
+      { t:"規制的ルール", m:"してはいけないこと、すべきことを決めるルール。行動を制限・禁止する。", src:"第2回 社会学の考え方", cf:["構成的ルール"] },
+      { t:"構成的ルール", m:"ルールによって行為そのものが成り立つルール。行動や意味を作り出す。", src:"第2回 社会学の考え方", cf:["規制的ルール"] },
+      { t:"社会化", m:"社会のルール・価値観・行動様式を学び、身につけるプロセス。生涯を通じて続く。", src:"第2回 社会学の考え方" },
+      { t:"役割期待", m:"社会的立場に応じて期待されるふるまいのこと。", src:"第2回 社会学の考え方", cf:["役割葛藤"] },
+      { t:"役割葛藤", m:"複数の役割期待がぶつかるときに生じる葛藤のこと。", src:"第2回 社会学の考え方", cf:["役割期待"] },
+      { t:"ステレオタイプ", m:"偏見、先入観、固定観念、レッテルなど、ある集団に対して一律に適用する標準化された見方のこと。", src:"第2回 社会学の考え方" },
+      { t:"かくれたカリキュラム", m:"学校特有の文化や日常を通じて、児童・生徒が知らず知らずのうちに教えられる、正式な教科書には書かれない『カリキュラム』のこと。", src:"第2回 社会学の考え方" },
+      { t:"文化資本", m:"知識・言語・習慣・態度・教養・趣味・ふるまいなど、社会のルールを使いこなす力。経済資本や社会関係資本と並ぶ社会的資源。", src:"第2回 社会学の考え方" },
+      { t:"身体化された文化資本", m:"話し方・姿勢・趣味・ハビトゥスなど、身体に体得された文化資本のこと。", src:"第2回 社会学の考え方", cf:["客体化された文化資本", "制度化された文化資本"] },
+      { t:"客体化された文化資本", m:"本・美術品など、物的形態で存在する文化資本のこと。", src:"第2回 社会学の考え方", cf:["身体化された文化資本", "制度化された文化資本"] },
+      { t:"制度化された文化資本", m:"学歴・資格など、制度的に認定された文化資本のこと。", src:"第2回 社会学の考え方", cf:["身体化された文化資本", "客体化された文化資本"] },
+      { t:"社会名目論", m:"社会は個人の集まりであり、個人の集団につけた名前にすぎないという理論。", src:"第3回 社会学史", cf:["社会実在論"] },
+      { t:"マックス・ヴェーバー", m:"社会名目論に基づき、社会に生きる個人の行為・目的・動機を理解することが重要と主張したドイツの社会学者。プロテスタンティズムと資本主義の関係を研究。", src:"第3回 社会学史" },
+      { t:"プロテスタンティズムの倫理と資本主義の精神", m:"ヴェーバーが提唱した理論で、西ヨーロッパに高度な資本主義が発達した背景にプロテスタンティズムの禁欲的な生活態度があるという説。", src:"第3回 社会学史" },
+      { t:"創発特性", m:"複数の行為が寄せ集まったとき、個人の動機や目的にもとづく1つの行為では説明できない新たな出来事や現象が生じることのこと。", src:"第3回 社会学史" },
+      { t:"社会有機体論", m:"社会を動物有機体になぞらえ、社会的分業は動物の各器官の機能分化になぞらえ、分化に対する統合機能を宗教や政府に求める理論。", src:"第3回 社会学史" },
+      { t:"社会システム論", m:"個人の目的や動機と無関係に存続する社会というシステムそのものの仕組みを研究する理論。タルコット・パーソンズが提唱。", src:"第3回 社会学史" },
+      { t:"タルコット・パーソンズ", m:"社会システム論を主張し、社会学の最重要課題は『社会秩序はいかにして可能か』を問うことだと提唱したアメリカの社会学者。", src:"第3回 社会学史" },
+      { t:"構造機能主義", m:"パーソンズが提唱した理論で、社会システムが秩序を保つための機能を分析する視点。", src:"第3回 社会学史" },
+      { t:"社会実在論", m:"社会は個人の目的と動機とは無関係に存続する実体であるという理論。デュルケムが主張。", src:"第3回 社会学史", cf:["社会名目論"] },
+      { t:"エミール・デュルケム", m:"社会実在論を主張し、自殺など個人的に見える現象も社会的要因で説明できることを示したフランスの社会学者。", src:"第3回 社会学史" },
+      { t:"自殺潮流", m:"個人的な動機によると思われる自殺にも、社会の影響が存在することを示すデュルケムの概念。", src:"第3回 社会学史" },
+      { t:"アノミー的自殺", m:"社会の道徳的秩序が弱まって、正しい生き方を見失うことによって生じる自殺のこと。", src:"第4回 社会学史・社会調査の目的と歴史", cf:["自己本位的自殺", "集団本位的自殺", "宿命的自殺"] },
+      { t:"自己本位的自殺", m:"社会のきずなより個人の生き方が重視され、孤独感が深刻化することによって生じる自殺のこと。", src:"第4回 社会学史・社会調査の目的と歴史", cf:["アノミー的自殺", "集団本位的自殺", "宿命的自殺"] },
+      { t:"集団本位的自殺", m:"集団の圧力が強すぎて、集団のために死を選ぶことによって生じる自殺のこと。", src:"第4回 社会学史・社会調査の目的と歴史", cf:["アノミー的自殺", "自己本位的自殺", "宿命的自殺"] },
+      { t:"宿命的自殺", m:"道徳的秩序が強すぎることで、願望や欲望を強制的に断念させられることによって生じる自殺のこと。", src:"第4回 社会学史・社会調査の目的と歴史", cf:["アノミー的自殺", "自己本位的自殺", "集団本位的自殺"] },
+      { t:"役割取得", m:"個人は地位に応じて従うべき役割を学習し、役割が体系的に組織されて社会制度が生まれることのこと。", src:"第3回 社会学史", cf:["役割距離"] },
+      { t:"役割距離", m:"個人が社会的役割から距離を取り、役割を演じながらも逆に効果的に役割を果たすことのこと。", src:"第3回 社会学史", cf:["役割取得"] },
+      { t:"アーヴィング・ゴフマン", m:"ドラマトゥルギーの観点から人は社会の中で役割を演じていると提唱したカナダの社会学者。", src:"第3回 社会学史" },
+      { t:"ドラマトゥルギー", m:"人はみな、社会の中でドラマ（役割）を演じているという考え方。", src:"第3回 社会学史" },
+      { t:"合理的選択理論", m:"個人は社会システムから外れて自由を享受し、コストとメリットを比較して合理的に行動するという理論。", src:"第3回 社会学史" },
+      { t:"フリーライダー", m:"公共財を維持するコストを負担しない人のこと。", src:"第3回 社会学史" },
+      { t:"ゲマインシャフト", m:"前近代社会・共同体を指し、生物有機体のように個人と個人が未分化で融合し、本質意志（感情中心）で結びつく社会のこと。", src:"第4回 社会学史・社会調査の目的と歴史", cf:["ゲゼルシャフト"] },
+      { t:"ゲゼルシャフト", m:"近代社会を指し、個人と個人が機械のように結合し、それぞれの必要や要求に応じて結びつき、選択意志（合理的・理性的）で成り立つ社会のこと。", src:"第4回 社会学史・社会調査の目的と歴史", cf:["ゲマインシャフト"] },
+      { t:"フェルディナンド・テンニエス", m:"ゲマインシャフトとゲゼルシャフトの概念を提唱したドイツの社会学者。", src:"第4回 社会学史・社会調査の目的と歴史" },
+      { t:"官僚制", m:"高度な専門性、規則による役割分担と権限、明確な上下の命令系統、公私の分離、文書によるコミュニケーションなどを特徴とする組織形態。", src:"第4回 社会学史・社会調査の目的と歴史" },
+      { t:"官僚制の逆機能", m:"縄張り意識、意思決定の遅れ、無駄な書類作成、柔軟性の欠如、個人の自由な発想への抑圧など、官僚制の弊害のこと。", src:"第4回 社会学史・社会調査の目的と歴史" },
+      { t:"アソシエーション", m:"官僚制の逆機能を補うため、個人の自発的な参加や自由なネットワークを重視する組織形態のこと。", src:"第4回 社会学史・社会調査の目的と歴史" },
+      { t:"準拠集団", m:"行動や判断をするとき、その集団に所属しているかどうかに関わらず、判断基準として参照する集団のこと。", src:"第4回 社会学史・社会調査の目的と歴史" },
+      { t:"予期的社会化", m:"個人が準拠集団の基準をあらかじめ学習することで、その集団にスムーズに適応できるようになるプロセスのこと。", src:"第4回 社会学史・社会調査の目的と歴史" },
+      { t:"内集団", m:"われわれ意識を持ち、一体感を感じている集団のこと。", src:"第4回 社会学史・社会調査の目的と歴史", cf:["外集団"] },
+      { t:"外集団", m:"われわれと無関係な他者の集団のこと。", src:"第4回 社会学史・社会調査の目的と歴史", cf:["内集団"] },
+      { t:"ウィリアム・サムナー", m:"内集団と外集団の概念を提唱したアメリカの社会学者。", src:"第4回 社会学史・社会調査の目的と歴史" },
+      { t:"チャールズ・ブース", m:"19世紀末にロンドンで貧困調査を実施し、『貧困』を客観的に定義して調査することを可能にした社会調査の先駆者。", src:"第4回 社会学史・社会調査の目的と歴史" },
+      { t:"ドキュメント分析", m:"個人的な記録（手紙、日記など）や公的記録（新聞、公文書など）を社会学のデータとして利用し分析する方法。", src:"第4回 社会学史・社会調査の目的と歴史" },
+      { t:"ライフヒストリー", m:"調査対象者の人生全体の歴史を、本人の語りとして記録し、データとして利用する手法のこと。", src:"第4回 社会学史・社会調査の目的と歴史" },
+      { t:"参与観察", m:"調査対象とする集団・組織・地域社会に入り込み、人びとと活動や生活をともにしながら、質的データの原料を収集する技法。", src:"第4回 社会学史・社会調査の目的と歴史", cf:["非参与観察"] },
+      { t:"ラベリング理論", m:"社会集団が規則をもうけ、それを特定の人々に適用し、彼らにアウトサイダーのレッテルを貼ることで逸脱を生み出すという理論。", src:"第4回 社会学史・社会調査の目的と歴史" },
+      { t:"ハワード・S・ベッカー", m:"マリファナ使用者を対象とする参与観察を行い、ラベリング理論を提唱したアメリカの社会学者。", src:"第4回 社会学史・社会調査の目的と歴史" },
+      { t:"学術調査", m:"認識それ自体が目的である調査のこと。", src:"第5・6回 社会調査の目的と歴史", cf:["市場調査", "世論調査"] },
+      { t:"市場調査", m:"マーケティング・リサーチとも呼ばれ、経済的利益を得る目的である調査のこと。", src:"第5・6回 社会調査の目的と歴史", cf:["学術調査", "世論調査"] },
+      { t:"世論調査", m:"マスコミによる調査で、公共的利益が目的である調査のこと。", src:"第5・6回 社会調査の目的と歴史", cf:["学術調査", "市場調査"] },
+      { t:"官庁統計", m:"国や地方行政機関が、国民国家の統治のため管理・統制目的で実施する統計調査のこと。国勢調査などが含まれる。", src:"第5・6回 社会調査の目的と歴史" },
+      { t:"国勢調査", m:"人口センサスとも呼ばれ、日本では1920年から5年ごとに実施される、国民国家の基本的な統計調査。", src:"第5・6回 社会調査の目的と歴史" },
+      { t:"標本調査", m:"母集団全体を調査するのではなく、標本を抽出して調査し、その結果から母集団全体を推定する調査方法。", src:"第5・6回 社会調査の目的と歴史", cf:["事例調査"] },
+      { t:"事例調査", m:"結果を統計量でなく質的な記述によって表現する調査方法のこと。", src:"第5・6回 社会調査の目的と歴史", cf:["標本調査"] },
+      { t:"横断的調査", m:"クロスセクション調査とも呼ばれ、単一の母集団に対して行う、1回限りの調査のこと。", src:"第7・8回 社会調査の種類", cf:["繰り返し調査", "パネル調査", "比較調査"] },
+      { t:"繰り返し調査", m:"複数の母集団に対して複数時点で繰り返して行う調査。時代や世代による変化を測定する。", src:"第7・8回 社会調査の種類", cf:["横断的調査", "パネル調査", "比較調査"] },
+      { t:"比較調査", m:"横断的調査を複数の母集団でそれぞれ1回ずつ行い、結果を比較する調査。国際比較調査などがある。", src:"第7・8回 社会調査の種類", cf:["横断的調査", "繰り返し調査", "パネル調査"] },
+      { t:"パネル調査", m:"単一の母集団に対して1回だけ標本調査を行い、同じ標本に対して複数時点で反復して行う調査。同一の調査対象者の変化を追跡する。", src:"第7・8回 社会調査の種類", cf:["横断的調査", "繰り返し調査", "比較調査"] },
+      { t:"社会階層", m:"社会的資源が人々のあいだに不平等に分配されていることによって生じる、社会内の階層のこと。", src:"第7・8回 社会調査の種類", cf:["社会階級"] },
+      { t:"社会階級", m:"社会の基本的な分化を示す概念。例えば階級社会では上流階級、中産階級、労働者階級などに明確に分かれる。", src:"第7・8回 社会調査の種類", cf:["社会階層"] },
+      { t:"社会移動", m:"社会階層のあいだを人が移動すること。", src:"第7・8回 社会調査の種類" },
+      { t:"世代間移動", m:"親の社会階層と比較して、その子供が上昇もしくは下降する社会移動のこと。", src:"第7・8回 社会調査の種類", cf:["世代内移動"] },
+      { t:"世代内移動", m:"人の一生のうちでの社会移動のこと。", src:"第7・8回 社会調査の種類", cf:["世代間移動"] },
+      { t:"SSM調査", m:"社会階層と社会階級に関する社会学を代表する社会調査。1955年に第1回が実施され、その後10年ごとに実施されている。", src:"第7・8回 社会調査の種類" },
+      { t:"職業威信スコア", m:"個々の職業の一般的な望ましさや地位の高さを、人びとへの意識調査の結果から作成される指標のこと。", src:"第7・8回 社会調査の種類" },
+      { t:"階層帰属意識", m:"自分がどの社会的階層に属しているかという個人の主観的な意識のこと。", src:"第7・8回 社会調査の種類" },
+      { t:"一億総中流", m:"1970年代に、日本人のおよそ9割が『中の上』『中の中』『中の下』と階層帰属意識で回答した現象のこと。", src:"第7・8回 社会調査の種類" },
+      { t:"学歴", m:"最終学歴のことであり、教育年数により区別される教育達成のこと。", src:"第7・8回 社会調査の種類", cf:["学校歴"] },
+      { t:"学校歴", m:"同じ学歴の中で、どの学校を卒業したかによって区別される教育達成のこと。", src:"第7・8回 社会調査の種類", cf:["学歴"] },
+      { t:"インフォームド・コンセント", m:"十分な説明を行ったうえで、自発的な同意のもとで調査を行うこと。調査倫理の基本原則。", src:"第9回 社会調査の倫理" },
+      { t:"コンフィデンシャリティ", m:"調査対象者の個人情報の秘密を厳守すること。調査倫理の基本原則。", src:"第9回 社会調査の倫理" },
+      { t:"調査地被害", m:"調査されるという行為が、対象者に与える迷惑や悪い影響のこと。", src:"第9回 社会調査の倫理" },
+      { t:"調査公害", m:"震災などで被災者に対して、複数の人が同じような調査を繰り返し行うことによって生じる悪影響のこと。", src:"第9回 社会調査の倫理" },
+      { t:"捏造", m:"存在しないデータや文献をつくりだす研究不正行為。FFPの一種。", src:"第9回 社会調査の倫理", cf:["改ざん", "盗用"] },
+      { t:"改ざん", m:"データを改ざんする研究不正行為。FFPの一種。", src:"第9回 社会調査の倫理", cf:["捏造", "盗用"] },
+      { t:"盗用", m:"他人の論文、アイディア、意見、言葉などを適切な引用なしに転用する研究不正行為。剽窃ともいい、FFPの一種。", src:"第9回 社会調査の倫理", cf:["捏造", "改ざん"] },
+      { t:"半構造化インタビュー", m:"あらかじめ質問項目を用意しておくが、調査対象者の回答に応じて柔軟に質問を変更する深層インタビュー手法のこと。", src:"第10・11回 質的調査の方法" },
+      { t:"ライフストーリー", m:"調査対象者の語った人生の物語を、『物語』という視点から分析する手法のこと。", src:"第10・11回 質的調査の方法", cf:["ライフヒストリー"] },
+      { t:"インフォーマント", m:"調査対象者のことであり、調査者に情報を提供する人のこと。", src:"第10・11回 質的調査の方法" },
+      { t:"ラポール", m:"対象者と調査者の間の信頼関係のこと。聞き取り調査の成功はラポール形成ができるかどうかで決まる。", src:"第10・11回 質的調査の方法" },
+      { t:"フィールドワーク", m:"長時間・長期間にわたって、調査対象地や対象集団に入り込んで行う調査のこと。", src:"第10・11回 質的調査の方法" },
+      { t:"エスノグラフィー", m:"フィールドワークの調査結果をもとに書かれた『厚い記述』のこと。", src:"第10・11回 質的調査の方法" },
+      { t:"非参与観察", m:"第三者として、調査対象をありのままに観察する技法。全体的な雰囲気を捉えるために役立つ。", src:"第10・11回 質的調査の方法", cf:["参与観察"] },
+      { t:"会話分析", m:"複数の話者の会話を、沈黙時間や話の割り込みも含めて、細かく文字化・記号化して分析する技法。", src:"第10・11回 質的調査の方法" },
+      { t:"トランスクリプト", m:"会話分析の際に、会話の詳細を文字化した記録のこと。", src:"第10・11回 質的調査の方法" },
+      { t:"エスノメソドロジー", m:"会話分析の基礎となる理論的立場で、日常的な相互行為の組織化を研究する。", src:"第10・11回 質的調査の方法" },
+      { t:"言説分析", m:"人が語ったものとして広く流通している『言説』の類型や解釈を論じる分析手法。", src:"第10・11回 質的調査の方法" },
+      { t:"グラウンデッドセオリー・アプローチ", m:"GTA。データに根ざした理論の構築を目指す質的研究の手法。データから理論を帰納的に構築する。", src:"第10・11回 質的調査の方法" },
+      { t:"テープ起こし", m:"レコーダーに録音したインタビューを書き起こす作業のこと。", src:"第10・11回 質的調査の方法" },
+      { t:"リサーチ・クエスチョン", m:"研究における『問い』のこと。記述的な問い（どのように？）と説明的な問い（なぜ？）がある。", src:"第12回 社会調査のプロセス・デザイン" },
+      { t:"仮説", m:"説明的な問いに対する仮の答え。『Xの変化に伴ってYも変化する』という形で表現される。", src:"第12回 社会調査のプロセス・デザイン" },
+      { t:"変数", m:"変化する値のこと。独立変数（説明変数）と従属変数（被説明変数）に分けられる。", src:"第12回 社会調査のプロセス・デザイン" },
+      { t:"独立変数", m:"従属変数を説明する変数のこと。原因とされる変数。", src:"第12回 社会調査のプロセス・デザイン", cf:["従属変数"] },
+      { t:"従属変数", m:"独立変数の影響を受ける変数のこと。結果とされる変数。", src:"第12回 社会調査のプロセス・デザイン", cf:["独立変数"] },
+      { t:"相関", m:"2つの変数の間に関連がみられることのこと。", src:"第12回 社会調査のプロセス・デザイン", cf:["因果関係"] },
+      { t:"因果関係", m:"変数Xと変数Yの間に媒介変数を介していない関連があり、Xが時間的に先行し、双方に影響する変数を統制しても関連がみられる関係のこと。", src:"第12回 社会調査のプロセス・デザイン", cf:["相関"] },
+      { t:"疑似相関", m:"見せかけの関連のこと。第三の変数が両変数に影響を与えることで、2つの変数に相関があるように見える場合を指す。", src:"第12回 社会調査のプロセス・デザイン" },
+      { t:"統制変数", m:"コントロール変数とも呼ばれ、独立変数と従属変数の双方に影響を与える第三の変数のこと。", src:"第12回 社会調査のプロセス・デザイン" },
+      { t:"理論仮説", m:"より抽象的で、社会学的な背景がある仮説のこと。", src:"第12回 社会調査のプロセス・デザイン", cf:["作業仮説"] },
+      { t:"作業仮説", m:"より具体的で、観察可能な仮説のこと。理論仮説の概念を操作化して作られる。", src:"第12回 社会調査のプロセス・デザイン", cf:["理論仮説"] },
+      { t:"概念の操作化", m:"理論的な構成概念を、実際に測定・観察可能な操作概念に置き換えるプロセスのこと。", src:"第12回 社会調査のプロセス・デザイン" },
+      { t:"構成概念妥当性", m:"操作概念が、構成概念を適切に測定できているかという問題のこと。", src:"第12回 社会調査のプロセス・デザイン" },
+      { t:"ワーディング", m:"質問文や選択肢の言葉遣いのこと。質問者の意図が回答者に正確に伝わるよう工夫することが重要。", src:"第13・14回 調査票の作成" },
+      { t:"ダブルバーレル質問", m:"1つの質問の中に複数の論点が混在している質問のこと。避けるべき質問形式。", src:"第13・14回 調査票の作成" },
+      { t:"誘導質問", m:"調査者が特定の回答を誘導するような質問のこと。避けるべき質問形式。", src:"第13・14回 調査票の作成" },
+      { t:"黙従傾向", m:"質問の書き方によって、特定の選択肢に偏った回答が得られるという、質問文の効果のこと。", src:"第13・14回 調査票の作成" },
+      { t:"権威の効果", m:"『有識者が言っている』などの権威の記述が、回答者の判断に影響を与える現象のこと。", src:"第13・14回 調査票の作成" },
+      { t:"プリ・コーディング", m:"選択肢に事前に数値を振っておくこと。分析を容易にする。", src:"第13・14回 調査票の作成" },
+      { t:"単項選択", m:"1つの選択肢のみを選ぶ質問形式のこと。", src:"第13・14回 調査票の作成", cf:["多項選択"] },
+      { t:"多項選択", m:"複数の選択肢をいくつでも選ぶ質問形式のこと。", src:"第13・14回 調査票の作成", cf:["単項選択"] },
+      { t:"程度選択", m:"5件法など、段階的な評価を1つ選ぶ質問形式のこと。", src:"第13・14回 調査票の作成" },
+      { t:"無作為抽出", m:"ランダムサンプリングとも呼ばれ、母集団に含まれるすべての人が同じ確率で抽出されるように標本を選ぶ方法。", src:"第10・11回 質的調査の方法" },
+      { t:"マニュアル", m:"手や身体を使った仕事のこと。製造、技術者、建設作業員などが含まれる。", src:"第7・8回 社会調査の種類", cf:["ノンマニュアル"] },
+      { t:"ノンマニュアル", m:"手を使わない仕事のこと。事務、営業、教員などが含まれる。", src:"第7・8回 社会調査の種類", cf:["マニュアル"] },
+      { t:"ホワイトカラー", m:"主に事務的な仕事に従事する者のこと。", src:"第7・8回 社会調査の種類", cf:["ブルーカラー"] },
+      { t:"ブルーカラー", m:"主に工場等で実際の作業に従事する者のこと。", src:"第7・8回 社会調査の種類", cf:["ホワイトカラー"] }
+    ]
+  },
+  {
+    id: "tetsugaku", name: "哲学の世界観", dir: "term",
+    memo: "期末は虫食い問題。長文中の（　）に語群から選んで書き込む形式（第15回資料）。大問は ①ソクラテス以前 ②ソクラテス ③プラトン ④アリストテレスとデカルト の4つ。",
+    cards: [
+      { t:"ローマ帝国", m:"イエスを教祖とするキリスト教は、当時の大帝国＝（　　）で国教とされ、ヨーロッパ中に広まった。", src:"デカルト・パスカル（宇宙観）", pri:1, sub:"空欄1", cf:["プロテスタント"] },
+      { t:"プロテスタント", m:"ルターをはじめ、ドイツ・スイス・イギリスなどヨーロッパ北部各地でカトリック教会への批判・離反がおき、（　　）と後世に呼ばれる新宗派が成立した。", src:"デカルト・パスカル（宇宙観）", pri:1, sub:"空欄2", def:"宗教改革により成立した新宗派。ルターらによるカトリック教会への批判から生まれた。個人が自分で聖書を読み、自分で自らの罪を悔い改めることが重視された。", cf:["ローマ帝国"] },
+      { t:"近代的自我", m:"各人が自分で聖書を読み、自分で罪を悔い改める（個人の内面を見つめる）ことによって罪の自覚が生まれる、というプロテスタントの主張から（　　）が成立した。", src:"デカルト・パスカル（宇宙観）", pri:1, sub:"空欄3", warn:true, note:"「近代的自我」で取ったが、資料によっては「個人主義」「内面」の可能性がある。先生に要確認。" },
+      { t:"独我論", m:"バークリーの「モノが意識の外に実在するという保証はない」「他人も世界も存在せず、神と自分だけ存在すると考えても矛盾しない」という考えは（　　）と呼ばれる。", src:"デカルト", pri:1, sub:"デカルト2 空欄1", cf:["方法的懐疑", "心身二元論"] },
+      { t:"方法的懐疑", m:"知識の確実性を吟味するためのデカルトの方法＝（　　）。疑う作業は誇張してあえて極端に行わなければならない。", src:"デカルト", pri:1, sub:"デカルト2 空欄2", def:"デカルトが知識の確実性を確保するために用いた方法。あえて極端に疑う作業を行うことで、疑いえない絶対的確実性を探る。「誇張してあえて極端に」疑うことが特徴。", cf:["独我論", "心身二元論"] },
+      { t:"心身二元論", m:"デカルトは「精神と物体（身体を含む）」は全く異なる本性をもつとして厳しく区別した＝（　　）。", src:"デカルト", pri:1, sub:"デカルト2 空欄3", def:"精神と物体（身体を含む）は全く異なる本性を持つとしてデカルトが厳しく区別した考え方。精神の本性は「思考すること」であり、物体の本性は「延び広がること」である。", cf:["方法的懐疑", "独我論"] },
+      { t:"思惟", m:"デカルトの心身二元論において、精神の本性＝（　　）。考えるということ以外の何ものでもない。", src:"デカルト", pri:1, sub:"デカルト2 空欄4", cf:["延長", "心身二元論"] },
+      { t:"延長", m:"デカルトの心身二元論において、物体の本性＝（　　）。空間的な広がりのこと。", src:"デカルト", pri:1, sub:"デカルト2 空欄5", def:"デカルト哲学における物体の本質的属性。身体・物体は空間座標の中に「延び広がる」ことを本質とする。質的に均質で無機的な広がりを意味する。", cf:["思惟", "心身二元論"] },
+      { t:"万物流転", m:"ヘラクレイトスの「万物は流転して（パンタ レイ）、なにものもとどまらない」＝（　　）説。", src:"ヘラクレイトスから原子論", pri:1, sub:"空欄1", cf:["対立物の一致"] },
+      { t:"対立物の一致", m:"ヘラクレイトスの主張。対立する力が拮抗し合った「緊張的調和」であり、対立すると見えるものも究極的には一致する＝（　　）。", src:"ヘラクレイトスから原子論", pri:1, sub:"空欄2", cf:["万物流転", "二分法"] },
+      { t:"二分法", m:"黒白、善悪、動静、愛憎などの二項対立により物事を把握しようとする思考＝（　　）（dichotomy）。", src:"ヘラクレイトスから原子論", pri:1, sub:"空欄3", warn:true, note:"dichotomy の訳語として「二分法」で取ったが、「二元論」と書かせる可能性もある。要確認。" },
+      { t:"イデア", m:"ヨーロッパ人は「現実の流転にかかわりなく変化しない何か」を探索する傾向をもつ。この「変化しない何か」は（　　）と呼ばれる。", src:"ヘラクレイトスから原子論", pri:1, sub:"空欄4", def:"感覚でとらえられる個々の事物の背後にある、その原型としての永遠不変の真の実在。プラトンが説いた。感覚やイメージではなく理性によってのみ把握され、個物の本当の存在根拠である。", warn:true, note:"「イデア」で取ったが「実体」「存在」の可能性もある。ニーチェの批判文脈なので要確認。" },
+      { t:"アトモン", m:"存在するものを合成する微小粒子は、それ以上分割できないので「分割できない」という意味で（　　）と呼ばれた。英語ならアトム（atom）＝原子。", src:"ヘラクレイトスから原子論", pri:1, sub:"空欄5", def:"「分割できない」という意味の古代ギリシア語。存在するものが、目には見えない分割不可能な微小粒子から合成されているという原子論で用いられた。英語の「アトム」の語源。", cf:["生成", "消滅", "変化"], note:"第15回の復習資料に「微小粒子＝原子（アトモン）」とあり確定。" },
+      { t:"アレクサンドロス", m:"紀元前343年、アリストテレスはマケドニア王フィリッポス2世に招かれ、当時13歳の王子（　　）の教育係となった。", src:"アリストテレス", pri:1, sub:"アリストテレス1 空欄1", def:"マケドニア王。アリストテレスが教育係となった当時13歳の王子。後に王位に就いて東方遠征に向かった。その遠征中、アリストテレスはアテナイに戻ってリュケイオンを設立した。", cf:["万学の祖"] },
+      { t:"万学の祖", m:"アリストテレスは論理学・言語学・自然学・心理学・経済学・倫理学・政治学・弁論術・詩学・生物学など、あらゆるジャンルの学問を論じたので（　　）と呼ばれる。", src:"アリストテレス", pri:1, sub:"アリストテレス1 空欄2", cf:["アレクサンドロス"] },
+      { t:"形相／質料", m:"アリストテレスの基本用語（　　）。英語では form / material、ギリシャ語では eidos / hyle。", src:"アリストテレス", pri:1, sub:"アリストテレス1 空欄3", cf:["可能態／現実態", "主語／述語"] },
+      { t:"可能態／現実態", m:"アリストテレスの基本用語（　　）。英語では possibility / actuality、ギリシャ語では dynamis / energeia。", src:"アリストテレス", pri:1, sub:"アリストテレス1 空欄4", cf:["形相／質料", "主語／述語"] },
+      { t:"主語／述語", m:"アリストテレスの基本用語（　　）。英語では subject / predicate、ギリシャ語では hypokeimenon / kategoria。", src:"アリストテレス", pri:1, sub:"アリストテレス1 空欄5", cf:["形相／質料", "可能態／現実態"] },
+      { t:"内在", m:"アリストテレスはイデアや形相そのものは否定せず、個物と完全に離れているのではなく、個物に（　　）すると考えた。", src:"アリストテレス", pri:1, sub:"アリストテレス1 空欄6", cf:["目的論"] },
+      { t:"目的", m:"物事のさまざまな活動の「かたち・モデル＝形相」は、一種の目標として事物のうちに内在する。すべてのものが（　　）をもつという考えは目的論と呼ばれる。", src:"アリストテレス", pri:1, sub:"アリストテレス1 空欄7", cf:["目的論", "内在"] },
+      { t:"目的論", m:"すべてのものが目的をもつという考えは（　　）と呼ばれる。あらゆるものに「目的」「役割」「機能」があるとする。", src:"アリストテレス", pri:1, sub:"アリストテレス1 空欄8", def:"アリストテレスの哲学における考え方。あらゆる事物が目標・目的として形相を内在させ、その実現を目指しているという考え。生物の場合、形相は現代風に言えば遺伝子に相当する。", cf:["目的", "有機体モデル"] },
+      { t:"DNA", m:"あらゆる事物は設計図に基づいてその実現・現実化を目指している。特に生物の場合、この設計図は現代風に言えば（　　）である。", src:"アリストテレス", pri:1, sub:"アリストテレス1 空欄9", warn:true, note:"「DNA」で取った。「遺伝子」と書かせる可能性もある。" },
+      { t:"数学・幾何学", m:"プラトンは（　　）を模範学問（モデル）にして思想を組み立てた。", src:"アリストテレス", pri:1, sub:"アリストテレス1 空欄10", cf:["生物学"], note:"第15回の復習資料（答え合わせ付き）で確定。「プラトンは（数学・幾何学）をモデルにイデアを構想」。" },
+      { t:"生物学", m:"アリストテレスは（　　）を模範学問（モデル）にして思想を組み立てた。", src:"アリストテレス", pri:1, sub:"アリストテレス1 空欄11" },
+      { t:"有機体モデル", m:"目的論と（　　）。ものを考える際に生物をお手本にすること。各臓器が個々の目的を果たすことで人体全体の生存に役立つ、という考え方。", src:"アリストテレス", pri:1, sub:"アリストテレス1 空欄13", def:"ものを考える際、生物をお手本にするモデル。アリストテレスが目的論を説く時に用いた。各臓器が個々の役割を果たしながら全体に奉仕する仕組みで、社会や国家の構造を説明するのに用いられた。", cf:["目的論"] },
+      { t:"質料因", m:"アリストテレスの四原因説のうち（　　）。「何から成り立っているか」＝家の例では「木製」。", src:"アリストテレス", pri:1, sub:"アリストテレス2 空欄1", def:"四原因説の一つ。物質が「何からできているか」を説明する原因。家の場合は「木製」、銅像の場合は「青銅」。", cf:["形相因", "作用因", "目的因"] },
+      { t:"形相因", m:"アリストテレスの四原因説のうち（　　）。「それが何であるか」＝家の例では「家だ」。", src:"アリストテレス", pri:1, sub:"アリストテレス2 空欄2", def:"四原因説の一つ。物質に形を与え、その物が「何であるか」を決定する原因。家の場合は「家の設計図」、人間の場合は「人間の形態」。", cf:["質料因", "作用因", "目的因"] },
+      { t:"作用因", m:"アリストテレスの四原因説のうち（　　）。「どういう動きが発生させたか」＝家の例では「大工が作った」。", src:"アリストテレス", pri:1, sub:"アリストテレス2 空欄3", cf:["質料因", "形相因", "目的因"] },
+      { t:"目的因", m:"アリストテレスの四原因説のうち（　　）。「それが何のためにあるか」＝家の例では「住むためのもの」。作用因と結局一致する。", src:"アリストテレス", pri:1, sub:"アリストテレス2 空欄4", def:"四原因説の一つ。その物が「何のためにあるか」という目的を説明する原因。家の場合は「住むためのもの」。動力因と結局一致することが多い。", cf:["質料因", "形相因", "作用因"] },
+      { t:"第二実体", m:"「人間」「動物」などの類概念は、変化しない一種の実体として（　　）と呼ばれる。指し示すことのできる個物である第一実体と対になる。", src:"アリストテレス", pri:1, sub:"アリストテレス2 空欄5", def:"アリストテレスの実体概念における類概念。「人間」「動物」などの普遍的なもので、個物によって変化しない。第一実体ほど真の実体ではないが、一種の実体と認めざるを得ないとされた。", cf:["形相／質料"] },
+      { t:"二世界", m:"神話は「人間の世界」と「神々の世界」という二つの世界を立てる＝（　　）論。世界を二つに分けずに説明したタレスと対比される。", src:"ソクラテス以前の哲学者たち", pri:1, sub:"空欄2", warn:true, note:"「二世界論」で取った。「二元論」の可能性もある。" },
+      { t:"自然哲学者", m:"イオニア学派の人々のように、主に「自然（ピュシス physis）」について考察した学者＝（　　）。", src:"ソクラテス以前の哲学者たち", pri:1, sub:"空欄3", def:"古代ギリシアで、主に「自然（ピュシス）」について考察した学者。イオニア学派のタレス、アナクシマンドロス、アナクシメネスらが代表。物質的根源を探求した。" },
+      { t:"冷・湿", m:"アナクシメネスはアルケーを「空気（アエール）」とし、空気の濃縮化⇒（　・　）への変換メカニズムを説明した。呼気は圧力をかけられて濃縮化されると冷たくなる。", src:"ソクラテス以前の哲学者たち", pri:1, sub:"空欄5", cf:["温・乾"], note:"第15回の復習資料（答え合わせ付き）で確定。「空気の濃縮・希薄＝冷／温、湿／乾」より濃縮側。" },
+      { t:"温・乾", m:"アナクシメネスはアルケーを「空気（アエール）」とし、空気の希薄化⇒（　・　）への変換メカニズムを説明した。口をゆるめて吐き出されると希薄化のためにあたたかくなる。", src:"ソクラテス以前の哲学者たち", pri:1, sub:"空欄6", cf:["冷・湿"], note:"第15回の復習資料（答え合わせ付き）で確定。「空気の濃縮・希薄＝冷／温、湿／乾」より希薄側。" },
+      { t:"数秘主義", m:"ピュタゴラス教団は、テトラクテュスの計10を「完全数」とするなど数を神格化した＝（　　）。", src:"ソクラテス以前の哲学者たち", pri:1, sub:"空欄7", warn:true, note:"「数秘主義」で取った。「数神秘主義」「数秘術」の可能性もある。" },
+      { t:"解脱", m:"ピュタゴラス教団の教義。魂の輪廻転生は苦痛であり、輪廻の輪から脱出すること＝（　　）。", src:"ソクラテス以前の哲学者たち", pri:1, sub:"空欄8", cf:["数秘主義"] },
+      { t:"アテネ", m:"ギリシアは統一国家ではなく、（　　）とスパルタの2大ポリス（都市国家）を中心とする植民地国家だった。", src:"第2回 神話から哲学へ", pri:1, sub:"空欄1", cf:["スパルタ"] },
+      { t:"スパルタ", m:"ギリシアは統一国家ではなく、アテネと（　　）の2大ポリス（都市国家）を中心とする植民地国家だった。", src:"第2回 神話から哲学へ", pri:1, sub:"空欄2", def:"古代ギリシアの主要なポリスの一つ。アテナイと対立し、ペロポネソス戦争（紀元前490～480年）でギリシアの主導権を争った。最終的にアテナイが勝利した。", cf:["アテネ"] },
+      { t:"ナポリ", m:"ギリシアの植民地の例。イタリアのネアポリスは現在の（　　）。", src:"第2回 神話から哲学へ", pri:1, sub:"空欄3" },
+      { t:"祖", m:"哲学の（　　）：タレス（紀元前625年〜紀元前546年）。神話の説明に飽き足りず別の説明を与えようとした。", src:"第2回 神話から哲学へ", pri:1, sub:"空欄4" },
+      { t:"アルケー", m:"タレスは「あらゆるものには、それがそこから生じ、そこへとかえってゆく『元のもの（　　）』がある」と考え、それを「水」だとした。", src:"第2回 神話から哲学へ", pri:1, sub:"空欄5", def:"「元のもの」「根源」。古代ギリシア自然哲学者たちが、あらゆるものがそこから生じ、そこへ帰ってゆく存在の根本原因として想定した。タレスは「水」、アナクシマンドロスは「無限なるもの」、アナクシメネスは「空気」、ピュタゴラスは「数」とした。", cf:["水", "空気", "無限なもの"] },
+      { t:"世界という大きな書物", m:"デカルトは書物での学問に疑問を抱き、従軍して外国を見て回った。「彼は（　　）を読みたかった」という。", src:"デカルト", pri:1, sub:"デカルト1 空欄1", cf:["近代哲学の父"] },
+      { t:"近代哲学の父", m:"ヘーゲルがデカルトを「意識という大陸の発見者」として評価したことから、デカルトは（　　）と呼ばれるようになった。", src:"デカルト", pri:1, sub:"デカルト1 空欄2", cf:["世界という大きな書物"] },
+      { t:"明証", m:"デカルトの理性を正しく使用するための四つの規則の①（　　）の規則。明証的と認めない限り真として受け入れず、即断と偏見を避ける。", src:"デカルト", pri:1, sub:"デカルト1 空欄3", cf:["分析", "総合", "枚挙"] },
+      { t:"分析", m:"デカルトの四つの規則の②（　　）の規則。困難な問題を、できるだけ多くの小部分に分割する。", src:"デカルト", pri:1, sub:"デカルト1 空欄4", cf:["明証", "総合", "枚挙"] },
+      { t:"総合", m:"デカルトの四つの規則の③（　　）の規則。最も単純で認識しやすい対象から始め、段階を踏んで複雑なものの認識にのぼってゆく。", src:"デカルト", pri:1, sub:"デカルト1 空欄5", cf:["明証", "分析", "枚挙"] },
+      { t:"枚挙", m:"デカルトの四つの規則の④（　　）の規則。何物も見落としていないと確信し得るほど完全な枚挙と全体の通覧を行う。", src:"デカルト", pri:1, sub:"デカルト1 空欄6", cf:["明証", "分析", "総合"] },
+      { t:"知識の確実性", m:"デカルトの時代の疑問＝（　　）。意識が物事の「ありのまま」の姿を捉えているという保証はどこにあるのか、という問い。", src:"デカルト", pri:1, sub:"デカルト1 空欄7", cf:["方法的懐疑"] },
+      { t:"魂の向け換え", m:"洞窟の比喩。「イデア、○○そのもの」の認識は（　　）を必要とする。これは大変な労力をともない、徐々に慣れる必要がある。", src:"プラトン", pri:1, sub:"プラトン2 空欄1", note:"第15回の復習資料（答え合わせ付き）で確定。「イデアの認識は『魂の向け換え』を必要とする」。" },
+      { t:"善", m:"ソクラテスが「アレテー」と呼んだ人間の美徳は、（　　）のイデア（イデアの中のイデア、他のイデア全てを照らす太陽のようなイデア）によって実現される。", src:"プラトン", pri:1, sub:"プラトン2 空欄2", def:"プラトン哲学における最高のイデア。「イデアの中のイデア」「他のイデア全てを照らす太陽のようなイデア」と表現される。美、真、善などのあらゆる価値は善のイデアに支えられている。", cf:["イデア"] },
+      { t:"想起説", m:"イデアの（　　）。人間はもとイデアの世界に住んでいたが、肉体をまとって生まれた瞬間に忘却した。学ぶこととはイデアを思い出すことにほかならない。", src:"プラトン", pri:1, sub:"プラトン2 空欄3", def:"プラトンの説。人間は生まれながらにイデアを知っており、肉体をまとってこの世界に生まれたとき忘却した。だが魂はイデアの世界に戻りたいという切望を持ち続け、個々の美しいものに触れたとき、以前に見たイデアを思い出す。", cf:["第三人間論", "三分説"] },
+      { t:"エロース", m:"魂はもとのイデアの世界に戻りたいという（　　）を持ち続けている。だからこそ個々の美しいものに触れて美のイデアを思い出し感極まる。", src:"プラトン", pri:1, sub:"プラトン2 空欄4", def:"プラトン哲学における。美のイデアへの憧れ・渇望。人間が理想の美に向かって抱く願望や衝動。肉体的欲望の背後にある精神的な渇望を指す。", cf:["想起説", "善"] },
+      { t:"三分説", m:"魂の（　　）。人間の魂は理性的部分・気概的部分・欲望的部分から成り、「気概」と「欲望」という二つの動力を「理性」が統御する。", src:"プラトン", pri:1, sub:"プラトン2 空欄5", cf:["想起説", "第三人間論"] },
+      { t:"第三人間論", m:"イデア論への批判。「人間のイデア」と「具体的な個々の人間」に類似する「共通の何か」＝第三の人間を仮定せざるを得なくなるというパラドクス＝（　　）。", src:"プラトン", pri:1, sub:"プラトン2 空欄6", def:"アリストテレスがプラトンのイデア論を批判するために提示したパラドクス。「人間のイデア」と「具体的な個々の人間」の関係を認識するには、両者に類似する「共通の何か」＝第三の人間が必要になり、無限後退に陥るという論証。", cf:["想起説", "三分説"] },
+      { t:"ピュタゴラス", m:"プラトンは遍歴のなかで、とりわけイタリアではパルメニデスと（　　）学派の哲学に影響を受けた。", src:"プラトン", pri:1, sub:"プラトン1 空欄1", def:"イタリア学派の哲学者・数学者（紀元前570～446）。アルケーを「数」とし、世界を数学的比例・調和によって説明した。また魂の輪廻転生を説き、輪廻の輪からの脱出（エクスターシス）を説いた。", cf:["アカデメイア"] },
+      { t:"アカデメイア", m:"プラトンが40歳を越えてから、アテナイ北西郊外のアカデモスの森に造った学園＝（　　）。紀元後529年に閉鎖されるまで900年続いた。", src:"プラトン", pri:1, sub:"プラトン1 空欄2", def:"プラトンが40歳を過ぎてから設立した学園。アテネの北西郊外にある英雄アカデモスを祭る神域に造られた。弟子たちとの共同研究機関で、900年続いた。", cf:["ピュタゴラス"] },
+      { t:"イデア", m:"何かの本質を定義するには、それらに共通するある種の「かたち」を把握せねばならない。この「かたち」をギリシア語で（　　）と呼ぶ。「見る（idein）」に由来し「見られたもの」を意味する。", src:"プラトン", pri:1, sub:"プラトン1 空欄3", def:"感覚でとらえられる個々の事物の背後にある、その原型としての永遠不変の真の実在。プラトンが説いた。感覚やイメージではなく理性によってのみ把握され、個物の本当の存在根拠である。", cf:["実在"] },
+      { t:"知性", m:"イデアは、感覚やイメージによってではなく（　　）によって把握される。", src:"プラトン", pri:1, sub:"プラトン1 空欄4", cf:["実在"], note:"第15回の復習資料（答え合わせ付き）で確定。「感覚・イメージではなく（知性）によって把握される」。" },
+      { t:"実在", m:"イデアこそが万物の（　　）であり、本当に在ると言えるものである。個物はイデアの影に過ぎない。", src:"プラトン", pri:1, sub:"プラトン1 空欄5", cf:["イデア"], note:"第15回の復習資料では「イデアこそが本当に在ると言えるもの＝真実在」と表記。" },
+      { t:"分有する", m:"個々のものは、イデアに「与かる」、イデアを（　　）ことによって、はじめて「美しいもの」「三角形」などとして存在する。", src:"プラトン", pri:1, sub:"プラトン1 空欄6", def:"プラトン哲学で、個物がイデアと関わることを表す表現。個物がイデアを「分有する」または「参与する」ことで、はじめて「美しいもの」「三角形」などとして存在するとされた。", cf:["イデア", "実在"], note:"第15回の復習資料では「イデアを分け有つ＝（分有）することにより個物を認識できる」と表記。" },
+      { t:"問答法", m:"ソクラテスの対話の仕方。「Xとは何か？」と問いかけ、相手に長々と話させず、一つの問いに一つの答えを返させる（＝　　）ことで、ともに言葉を定義してゆく。", src:"ソクラテス", pri:1, sub:"ソクラテス1 空欄1", def:"ソクラテスが用いた対話による知識探求の方法。「X とは何か」と問いかけ、相手に長々と話させず一つの問いに一つの答えを返させ、矛盾を明らかにして共に言葉を定義していく手法。", cf:["助産術", "無知の知"] },
+      { t:"助産術", m:"ソクラテスが問い続けることで、相手も自覚していない考えを産み出す手助けをすること（＝　　）。母が助産婦だったことに由来する。", src:"ソクラテス", pri:1, sub:"ソクラテス1 空欄2", cf:["問答法", "無知の知"] },
+      { t:"無知の知", m:"相手が矛盾に陥って「あなたは答えを知っていて問うたのだろう」と言われると、「私も知らない。知らないから教えてもらおうとしたのだ」と言うのがつねだった＝ソクラテスの（　　）。", src:"ソクラテス", pri:1, sub:"ソクラテス1 空欄3", def:"ソクラテスの考え方。自分は知らないことを知っており、一方で知識を持つと思い込んでいる者は実は「思惑」を持つだけで本当は無知である。この自覚こそが知への道を開くとされた。", cf:["問答法", "助産術"] },
+      { t:"アレテー", m:"ソクラテスのテーマ「ただ生きるのではなく、よく生きる」。魂が（　　）＝優秀さ、卓越性、徳、美徳をもつように配慮することが必要。", src:"ソクラテス", pri:1, sub:"ソクラテス1 空欄4", def:"ギリシア語で「徳」「優秀さ」「卓説性」を意味する。ソクラテスはこれを人間にとって最も重要な価値と考え、「よく生きる」ために魂がアレテーを持つよう「自分で配慮する」必要があると述べた。" },
+      { t:"魂の世話", m:"魂がアレテーを持つように「自分で配慮する」＝（　　）（epimeleia psyches）が必要。", src:"ソクラテス", pri:1, sub:"ソクラテス1 空欄5", def:"ソクラテスが最も重要とした活動。ギリシア語で「エピメレイア・プシュケース」。自分の魂が「アレテー」を持つよう自分で配慮し、自分の信念を吟味し続けることで初めて「よく生きる」ことができると述べた。", cf:["アレテー", "問答法"], note:"第15回の復習資料（答え合わせ付き）で確定。第15回では「魂の世話」表記。資料によっては「魂への配慮」とも書く。" },
+      { t:"原因", m:"「自然」に関する「なぜ？」は（　　）で答えられる。これに対し「人間」に関する「なぜ？」は目的でしか答えられない。", src:"ソクラテス", pri:1, sub:"ソクラテス1 空欄6", cf:["目的"] },
+      { t:"目的", m:"「人間」に関する「なぜ？」は（　　）でしか答えられない。これにはなんらかの「よさ」（＝価値）が含まれる。", src:"ソクラテス", pri:1, sub:"ソクラテス1 空欄7", cf:["原因"] },
+      { t:"相対主義", m:"ソフィストは「知者」を自称し、知恵とアレテーを授けると公言して弁論術を教えた。（　　）を主張する者が多かった。", src:"ソクラテス", pri:1, sub:"ソクラテス1 空欄8", cf:["人間尺度説"] },
+      { t:"人間尺度説", m:"ソフィストのプロタゴラスが唱えた（　　）。「人間は万物の尺度である」とするもの。", src:"ソクラテス", pri:1, sub:"ソクラテス1 空欄9", cf:["相対主義"] },
+      { t:"ソクラテスより知恵のある者はいない", m:"弟子のカイレフォンがデルフォイでアポロン神から受けた神託の内容＝（　　）。", src:"ソクラテス", pri:1, sub:"ソクラテス1 空欄10", cf:["無知の知"] },
+      { t:"善美の事柄", m:"神託を受けたソクラテスは、知識、特に（　　）についての知識をもつかどうか、著名な知識人をテストして回った。", src:"ソクラテス", pri:1, sub:"ソクラテス1 空欄11", note:"第15回の復習資料（答え合わせ付き）で確定。「本当に大切な事柄＝（善美の事柄）に関しては無知だ」。" },
+      { t:"パラドクス", m:"ソクラテスの（　　）。「アレテーとは知である」「進んで悪を行う者はいない」「よさを知っていながら悪いことを為すことは不可能である」など。", src:"ソクラテス", pri:1, sub:"ソクラテス2 空欄1", cf:["無知の知"], warn:true, note:"「パラドクス（逆説）」で取った。" },
+      { t:"徳の教授", m:"徳を他人に教えることはできるか＝（　　）は可能か。ソクラテスは、政治にとって重要な徳は建築術や造船術のような知識とは異なり、他人に教えたり学んだりできないと主張した。", src:"ソクラテス", pri:1, sub:"ソクラテス2 空欄2", warn:true, note:"「徳の教授」で取った。「アレテーの教授」の可能性もある。" },
+      { t:"ロゴス", m:"ヘラクレイトスが提唱した概念＝（　　）。万物は流転し、対立物は一致するとしたうえで、その根底にある理法をこう呼んだ。", src:"ヘラクレイトスから原子論", pri:1, sub:"第15回", cf:["万物流転", "対立物の一致"] },
+      { t:"水", m:"タレスのアルケー（元のもの）は（　　）である。", src:"ソクラテス以前の哲学者たち", pri:1, sub:"第15回", cf:["無限なもの", "空気", "数・比率"] },
+      { t:"無限なもの", m:"アナクシマンドロスのアルケー（元のもの）は（　　）である。", src:"ソクラテス以前の哲学者たち", pri:1, sub:"第15回", cf:["水", "空気", "数・比率"] },
+      { t:"空気", m:"アナクシメネスのアルケー（元のもの）は（　　）である。", src:"ソクラテス以前の哲学者たち", pri:1, sub:"第15回", cf:["水", "無限なもの", "数・比率"] },
+      { t:"数・比率", m:"ピュタゴラスのアルケー（元のもの）は（　　）である。和音が整数比からなることの発見が根拠。", src:"ソクラテス以前の哲学者たち", pri:1, sub:"第15回", cf:["水", "空気", "無限なもの"] },
+      { t:"音楽", m:"もとは宗教家だったピュタゴラスは、「魂の癒し」に（　　）が効果的だと考え、琴を用いて和音の研究を行った。", src:"ソクラテス以前の哲学者たち", pri:1, sub:"第15回", cf:["数・比率", "解脱"] },
+      { t:"生成", m:"デモクリトスの原子論において、アトモンの集合＝ものの（　　）。", src:"ヘラクレイトスから原子論", pri:1, sub:"第15回", cf:["消滅", "変化"] },
+      { t:"消滅", m:"デモクリトスの原子論において、アトモンの分離＝ものの（　　）。", src:"ヘラクレイトスから原子論", pri:1, sub:"第15回", cf:["生成", "変化"] },
+      { t:"変化", m:"デモクリトスの原子論において、アトモンの配列＝ものの（　　）。", src:"ヘラクレイトスから原子論", pri:1, sub:"第15回", cf:["生成", "消滅"] },
+      { t:"パルメニデスの根本ルール", m:"「存在するものはずっと存在し続け、無になったりはしない。逆に、無はずっと無のままで存在するようになったりはしない」＝（　　）。生成・消滅・運動・変化を完全否定する。", src:"ヘラクレイトスから原子論", pri:1, sub:"第15回", cf:["万物流転"] },
+      { t:"デモクラシー", m:"アテネは民主主義（　　）という政治形態だった。そのため生まれにかかわらずアレテーのある者が尊敬された。", src:"ソクラテス", pri:1, sub:"第15回", cf:["ソフィスト", "アレテー"] },
+      { t:"ソフィスト", m:"アテネでアレテーは「言葉や言論の技術（弁論術）」であり、政治家になるために必要だった。この弁論術の職業教師＝（　　）。", src:"ソクラテス", pri:1, sub:"第15回", def:"古代ギリシアの知識人。「ソフィア」（知恵）を教える者で、特に政治家になるためのスキル「弁論術」を教え、知識と徳を授けることができると公言していた。多くは相対主義を主張した。", cf:["デモクラシー", "相対主義"] },
+      { t:"政治家", m:"ソクラテスが神託を受けて訪ね歩いた「知者とされていた人々」3種類のうちの1つ＝（　　）。", src:"ソクラテス", pri:1, sub:"第15回", cf:["詩人", "職人"] },
+      { t:"詩人", m:"ソクラテスが神託を受けて訪ね歩いた「知者とされていた人々」3種類のうちの1つ＝（　　）。", src:"ソクラテス", pri:1, sub:"第15回", cf:["政治家", "職人"] },
+      { t:"職人", m:"ソクラテスが神託を受けて訪ね歩いた「知者とされていた人々」3種類のうちの1つ＝（　　）。", src:"ソクラテス", pri:1, sub:"第15回", cf:["政治家", "詩人"] },
+      { t:"コギト・エルゴ・スム", m:"「我思う、ゆえに我あり」。デカルトが、疑うことはできない絶対的確実性を求めて到達した哲学の第一原理。あらゆるものを疑っても、疑っている自分の思考だけは疑えないという洞察から出発する。", src:"デカルト", pri:2, sub:"方法的懐疑" },
+      { t:"明晰判明", m:"デカルトが真なる観念の特性として挙げたもの。「明晰」は輪郭がくっきりしていることで、「判明」は他のものとはっきり分けられることを意味する。この特性を満たす観念をデカルトは「真」と考える。", src:"デカルト", pri:2, sub:"理性を正しく使用するための四つの規則" },
+      { t:"観念説", m:"モノが意識の外に実在し、意識に印鑑のように印象を与え、意識内に像＝観念を作り出すとする理論。知覚の仕組みを説明する。", src:"デカルト", pri:2, sub:"知覚の観念説" },
+      { t:"タレス", m:"古代ギリシア自然哲学の開祖（紀元前625～546）。万物の根源を「水」とし、生命を養うものは水気を持つこと、温かさそのものも水から生じることを観察して説いた。", src:"ソクラテス以前の哲学者たち", pri:2, sub:"タレス" },
+      { t:"アナクシマンドロス", m:"イオニア学派の哲学者（紀元前611～546）。アルケーを「無限なるもの（アペイロン）」とした。限界のないものは限界を持たないため、限界となることがないと考えた。", src:"ソクラテス以前の哲学者たち", pri:2, sub:"アナクシマンドロス", cf:["タレス", "アナクシメネス"] },
+      { t:"アナクシメネス", m:"イオニア学派の哲学者（紀元前586～526）。アルケーを「空気（アエール）」とし、空気の濃縮化で固体が、希薄化で熱が発生する変換メカニズムによってすべてを説明した。", src:"ソクラテス以前の哲学者たち", pri:2, sub:"アナクシメネス", cf:["タレス", "アナクシマンドロス"] },
+      { t:"テトラクテュス", m:"ピュタゴラス教団の神聖なシンボル。1から4までの数字を点で表し、三角形状に配置したもので、合計10を表す。数によって世界全体を象徴する。", src:"ソクラテス以前の哲学者たち", pri:2, sub:"ピュタゴラス教団" },
+      { t:"ヘラクレイトス", m:"古代ギリシアの哲学者（紀元前535～475頃）。「エフェソスの暗き人」と呼ばれた。万物は流転し、対立する力が拮抗した「緊張的調和」によって成立すると説き、「戦いは万物の父であり王である」と述べた。", src:"ヘラクレイトスから原子論", pri:2, sub:"ヘラクレイトス", cf:["パルメニデス"] },
+      { t:"パンタ・レイ", m:"ヘラクレイトスの主張「万物は流転して、なにものもとどまらない」を表すギリシア語表現。「同じ川に二度入ることはできない」という比喩で知られる。", src:"ヘラクレイトスから原子論", pri:2, sub:"ヘラクレイトス", cf:["アルケー"] },
+      { t:"対立図法", m:"黒白、善悪、動静、愛憎などの二項対立により物事を把握しようとする思考方法。ヘラクレイトスが対立する力の拮抗を説く際に関連する概念。", src:"ヘラクレイトスから原子論", pri:2, sub:"ヘラクレイトス" },
+      { t:"パルメニデス", m:"古代ギリシアの哲学者（紀元前500頃）。存在と非存在の論理的性質を探究し、「在るとすればどこまでも在り、在らぬとすればどこまでも在らぬ」と述べた。生成・消滅・運動・変化を完全に否定した。", src:"ヘラクレイトスから原子論", pri:2, sub:"パルメニデス", cf:["ヘラクレイトス"] },
+      { t:"デモクリトス", m:"古代ギリシアの哲学者（紀元前460～370頃）。原子論の代表論者。「甘い」「辛い」「熱い」「色」などはすべて習慣や決まりごと（ノモス）に過ぎず、真実には「原子と虚」のみが存在すると述べた。", src:"ヘラクレイトスから原子論", pri:2, sub:"原子論デモクリトス" },
+      { t:"ノモス", m:"ギリシア語で「慣習」「決まりごと」を意味する。デモクリトスは感覚的性質（色、味など）をノモスの産物と考え、真実は原子と虚のみだと述べた。", src:"ヘラクレイトスから原子論", pri:2, sub:"原子論デモクリトス", cf:["エイドス"] },
+      { t:"ケノン", m:"ギリシア語で「虚」「空虚」を意味する。原子論において、粒子の間にある何もない空間を指す。アトモンとともに、存在するものの根本要素とされた。", src:"ヘラクレイトスから原子論", pri:2, sub:"原子論", cf:["アトモン"] },
+      { t:"形相", m:"アリストテレス哲学において、物体の形や本質の側面。質料（素材）と対をなし、個物の実体を形成する。プラトンのイデアと異なり、個物に内在するものとされる。ギリシア語では「エイドス」。", src:"アリストテレス", pri:2, sub:"基本用語", cf:["イデア", "質料"] },
+      { t:"質料", m:"アリストテレス哲学において、物体の素材・物質の側面。形相と対をなし、個物の実体を形成する。質料だけでは、物体の「動（変化・運動）」を説明することはできない。", src:"アリストテレス", pri:2, sub:"基本用語", cf:["形相"] },
+      { t:"可能性", m:"アリストテレス哲学における状態。ギリシア語で「デュナミス」。物体が持つ潜在的な力や能力を指し、現実性（現実態・エネルゲイア）に対比される。", src:"アリストテレス", pri:2, sub:"基本用語", cf:["現実性", "エネルゲイア"] },
+      { t:"現実性", m:"アリストテレス哲学における状態。ギリシア語で「エネルゲイア」。可能性の実現状態を指す。動（変化）はこの可能性から現実性への移行として説明される。", src:"アリストテレス", pri:2, sub:"基本用語", cf:["可能性", "デュナミス"] },
+      { t:"実体", m:"アリストテレス哲学の中心概念。他が変化しても、それだけは変化しないような核。ギリシア語で「ウーシア」。主語にはなるが述語にはならないもの。", src:"アリストテレス", pri:2, sub:"実体概念" },
+      { t:"四原因説", m:"アリストテレスが説いた、動（変化）の原因は4種類あるという説。①質料因（何から成り立つか）②形相因（それが何であるか）③動力因（どういう動きが発生させたか）④目的因（それが何のためにあるか）。", src:"アリストテレス", pri:2, sub:"動の説明" },
+      { t:"主語", m:"アリストテレス論理学における「ヒュポケイメノン」（下に横たわるもの）。文の中で述語の対象となり、それ自体は変化しない実体を表す。例：「ソクラテスは色白である」の「ソクラテス」。", src:"アリストテレス", pri:2, sub:"実体概念", cf:["述語"] },
+      { t:"述語", m:"アリストテレス論理学における「カテゴリア」。主語に対して述べられる性質や属性。「白い」「重さがある」など、変化しうるもの。性質を述べることを意味する。", src:"アリストテレス", pri:2, sub:"実体概念", cf:["主語"] },
+      { t:"第一実体", m:"アリストテレスの実体概念における個物。「ここにあるこのもの」と指し示すことのできる個別的存在（ソクラテス、太郎など）。最も根本的で真の実体とされた。", src:"アリストテレス", pri:2, sub:"実体概念", cf:["第二実体"] },
+      { t:"動力因", m:"四原因説の一つ。その物が「どういう動きによって発生したか」を説明する原因。家の場合は「大工が作った」。", src:"アリストテレス", pri:2, sub:"四原因説", cf:["目的因"] },
+      { t:"プラトニック・ラブ", m:"後世に呼ばれた、肉体的ではなく精神的な愛。プラトン哲学では、誰かを愛したとき、その相手に対面すると、その人が持つ美のイデアへの憧れ（エロース）から愛したいと願っていたことに気づくとされた。", src:"プラトン", pri:2, sub:"プラトニック・ラブ", cf:["エロース"] },
+      { t:"魂の三部分", m:"プラトンが説いた人間の魂の構成。「理性的部分」「気概的部分」「欲望的部分」の三つに分けられ、理性が気概と欲望を統御する。二頭立ての馬車を御者が操縦する比喩で説明される。", src:"プラトン", pri:2, sub:"プラトニック・ラブ" },
+      { t:"洞窟の比喩", m:"プラトンがイデア論の理解困難さを説明するため述べた比喩。囚人が洞窟の奥に縛られ、火の光に照らされた影しか見えない。真の知識（イデア）の獲得は労力を伴い、多くの人には受け入れられず、その知を得た哲学者は世間から理解されない危険を述べた。", src:"プラトン", pri:2, sub:"洞窟の比喩" },
+      { t:"ソクラテス", m:"古代ギリシアの哲学者（紀元前469～399）。アテネのアゴラで人々と問答し、「X とは何か」と問いかけて相手に矛盾を自覚させることで、共に言葉を定義していった。著書はなく、弟子プラトンが伝記的対話篇を記した。", src:"ソクラテス", pri:2, sub:"生涯" },
+      { t:"ソクラテスの知識", m:"ソクラテスが述べた三つの知識の段階。①「無知」（アグノイア）：知らない状態。②「思惑」（ドクサ）：個人的信念のみ抱いている状態。③「知識」（ソフィア）：本当に知を持っている状態。多くの人は思惑を知識と勘違いしている。", src:"ソクラテス", pri:2, sub:"無知の知" },
+      { t:"産婆術", m:"ソクラテスが述べた自分の哲学的役割。助産婦が赤ん坊を産み出す手助けをするように、自分は相手の中にある考えを産み出す手助けをするということ。ギリシア語では「マイエウティケー」。", src:"ソクラテス", pri:2, sub:"生涯" },
+      { t:"ソクラテスの反語法", m:"ソクラテスが問答で用いた技法。相手が矛盾に陥って「あなたは答えを知っていて問うたのだろう」と尋ねると、「私も知らない。知らないから知っていると言う君に教えてもらおうとしたのだ」と答える、知人知らぬふりをして知識を引き出す方法。", src:"ソクラテス", pri:2, sub:"生涯" },
+      { t:"アクラシア", m:"ギリシア語で「無抑制」。「よさ」について知識を持ちながら、それでも悪いことをしてしまう状態をいう。ソクラテスはこれは不可能であり、そう見える場合は実は「よさ」について無知だったのだと述べた。", src:"ソクラテス", pri:2, sub:"ソクラテスの言う「よさ」の特徴" },
+      { t:"プロタゴラス", m:"古代ギリシアの有名なソフィスト。「人間は万物の尺度である」という相対主義を主張した。また「政治に関する知識は他人に教えることができる」と述べ、ソクラテスと対立した。", src:"ソクラテス", pri:2, sub:"ソフィストたちの主張", cf:["ソクラテス"] },
+      { t:"天動説", m:"地球が宇宙の中心にあり、天体がその周りを回転するという宇宙観。アリストテレスの天球説やプトレマイオスの周転円説により説明された。16世紀まで支配的であった。", src:"デカルト・パスカル（宇宙観）", pri:2, sub:"宇宙観の変遷", cf:["地動説"] },
+      { t:"地動説", m:"地球が太陽の周りを公転するという宇宙観。コペルニクス、ケプラー、ガリレオらにより提唱された。地球が宇宙の中心ではなく、宇宙は無限だという観点をもたらした。", src:"デカルト・パスカル（宇宙観）", pri:2, sub:"宇宙観の変遷", cf:["天動説"] },
+      { t:"周転円", m:"プトレマイオスの天動説で、惑星が「前進したり元に戻るように見える現象」を説明するために想定された、各惑星が地球周回軌道上で行う小さな円運動。", src:"デカルト・パスカル（宇宙観）", pri:2, sub:"宇宙観の変遷" },
+      { t:"世界観", m:"その人の考え方・捉え方の枠組み。個人、社会、文化、時代に規定され、世の中をおおまかに眺める構えや捉え方。作品や学問にも表れ、場合によっては歪んでいることもある。", src:"第1回 オリエンテーション", pri:3, sub:"オリエンテーション" },
+      { t:"哲学", m:"ギリシア語で「フィロソフィア」。「知を愛する」「知の愛求」を意味する。ソクラテスが自分を「知識人・知者」ではなく「知を愛する者」と呼び、この営みを「哲学」と称した。特定の世界観を持たず、常に世界観の正しさをテストする営み。", src:"第1回 オリエンテーション", pri:3, sub:"オリエンテーション" },
+      { t:"エイドス", m:"ギリシア語で、本来は「見られたもの」という意味。プラトンのイデア、アリストテレスの形相を指す。ギリシア哲学の中心概念の一つ。", src:"プラトン", pri:2, sub:"イデアの特徴", cf:["イデア", "形相"] },
+      { t:"デュナミス", m:"アリストテレス哲学のギリシア語で「可能性」。物体が持つ潜在的な力や能力。エネルゲイア（現実性）に対比される。", src:"アリストテレス", pri:2, sub:"基本用語", cf:["エネルゲイア"] },
+      { t:"エネルゲイア", m:"アリストテレス哲学のギリシア語で「現実性」。可能性の実現状態。デュナミスに対比される。動（変化）はデュナミスからエネルゲイアへの移行として説明される。", src:"アリストテレス", pri:2, sub:"基本用語", cf:["デュナミス"] },
+      { t:"パスカル", m:"フランスの哲学者・数学者（17世紀）。「人間は考える葦である」という名言で知られ、無限宇宙の中での人間の尊厳を「思惟」に求めた。人間の尊厳は空間や時間ではなく、思考の規則によるべきだと述べた。", src:"デカルト・パスカル（宇宙観）", pri:2, sub:"パスカル" },
+      { t:"バークリー", m:"イギリスの哲学者・聖職者（17世紀後半～18世紀前半）。知覚の観念説に対して、モノが意識の外に実在する保証はないのではないかと問題提起した。「他人も世界も存在せず、『神と自分』だけ存在する」という考えを提示した。", src:"デカルト", pri:2, sub:"知覚の観念説への問題提起" },
+      { t:"観念主義", m:"バークリーが提示した考え方。モノが意識の外に実在するという保証はなく、すべて主観的な観念の産物だという立場。現代のヴァーチャル・リアリティー（仮想現実）の思想的先祖とされた。", src:"デカルト", pri:2, sub:"知覚の観念説への問題提起", cf:["観念説"] },
+      { t:"永遠真理創造説", m:"デカルトが述べた考え方。数学・幾何学・論理学などの永遠真理も、神が創造したものであり、神の意向次第では別の可能性もあるということ。ライプニッツやスピノザの「数学・幾何学・論理学は神も従う永遠真理」という説と対立。", src:"デカルト", pri:2, sub:"知識の３つの源泉" },
+      { t:"良識", m:"デカルトが述べた「ボン・サンス」。真なるものを偽なるものから分かつ能力で、本来すべての人において相等しい。人間の理性・判断力の根拠をなす。", src:"デカルト", pri:2, sub:"理性を正しく使用するための四つの規則" },
+      { t:"アペイロン", m:"アナクシマンドロスが想定したアルケー。ギリシア語で「無限なるもの」「限界のないもの」を意味する。限界のないもの故に、限界となることがないため、すべての根源となり得ると考えられた。", src:"ソクラテス以前の哲学者たち", pri:2, sub:"アナクシマンドロス", cf:["アルケー"] },
+      { t:"アエール", m:"アナクシメネスが想定したアルケー。ギリシア語で「空気」を意味する。濃縮化で固体に、希薄化で熱に変わるという説明により、すべての物質変化を説明した。", src:"ソクラテス以前の哲学者たち", pri:2, sub:"アナクシメネス", cf:["アルケー"] },
+      { t:"アリスモス", m:"ピュタゴラスが想定したアルケー。ギリシア語で「数」を意味する。世界を数学的比例・調和によって説明する数理主義の起源となった。", src:"ソクラテス以前の哲学者たち", pri:2, sub:"ピュタゴラス", cf:["アルケー"] },
+      { t:"ハルモニア", m:"ピュタゴラス哲学で「調和」を意味する。弦の整数比率が和音を生み出すという発見から、世界全体が数学的調和によって成立していると考えた。数における比例のことも指す。", src:"ソクラテス以前の哲学者たち", pri:2, sub:"ピュタゴラス" },
+      { t:"輪廻", m:"ピュタゴラス教団が説いた教義。人間の魂が生死を繰り返しながら転生すること。輪廻は苦痛と見なされ、この輪から脱出（エクスターシス）することが目標とされた。", src:"ソクラテス以前の哲学者たち", pri:2, sub:"ピュタゴラス" },
+      { t:"エクスターシス", m:"ピュタゴラス教団が説いた理想状態。輪廻の輪からの脱出・超越を意味する。魂の浄化を目指す修行の最終目標とされた。", src:"ソクラテス以前の哲学者たち", pri:2, sub:"ピュタゴラス" },
+      { t:"ムーシケー", m:"ピュタゴラス教団における「音楽」。ギリシア語で、魂を癒すための音楽的実践。肉体の浄化のためには医術が、魂の浄化のためには音楽が必要だと考えられた。", src:"ソクラテス以前の哲学者たち", pri:2, sub:"ピュタゴラス" },
+      { t:"キーネーシス", m:"アリストテレス哲学のギリシア語で「動」「変化」「運動」を意味する。形相の入れ替わりやデュナミスからエネルゲイアへの移行によって説明される。", src:"アリストテレス", pri:2, sub:"動の説明" },
+      { t:"ウーシア", m:"ギリシア語で「実体」を意味する。アリストテレス哲学の中心概念。他が変化しても変化しないような核、または主語にはなるが述語にはならないもの。", src:"アリストテレス", pri:2, sub:"実体概念" },
+      { t:"ヒュポケイメノン", m:"ギリシア語で「下に横たわるもの」を意味する。主語の概念の根源。それ自体は変化しない実体を表す。アリストテレス論理学の基本概念。", src:"アリストテレス", pri:2, sub:"実体概念", cf:["カテゴリア"] },
+      { t:"カテゴリア", m:"ギリシア語で「述語」を意味する。もとは「広場に向かって語る」という動詞に由来し、「性質を述べる」という意味になった。述べられる側としての変化しうる属性を指す。", src:"アリストテレス", pri:2, sub:"実体概念", cf:["ヒュポケイメノン"] },
+      { t:"シュンベベーコス", m:"ギリシア語で「属性」「性質」を意味する。アリストテレス哲学で、実体に対比される変化しうる性質や付帯性を指す。", src:"アリストテレス", pri:2, sub:"実体概念", cf:["ウーシア"] },
+      { t:"神話", m:"古代社会で、自然現象や人間の起源を説明していた説話。ギリシア神話では、雷や津波などの現象を神々の行動で説明していた。哲学はこうした神話的説明に代わる理性的説明を求めて成立した。", src:"第2回 神話から哲学へ", pri:2, sub:"神話から哲学へ" },
+      { t:"宇宙創世神話", m:"古代社会における宇宙や世界の起源を説く神話。ギリシア神話ではヘシオドスの『神統記』が有名で、カオス（混沌）から各種の神々が生成される過程を述べている。", src:"第2回 神話から哲学へ", pri:2, sub:"神話から哲学へ" },
+      { t:"ポリス", m:"古代ギリシアの都市国家。アテナイやスパルタが有名。地理的・政治的に独立した小国家で、ギリシアは統一国家ではなく複数のポリスから成り立っていた。", src:"第2回 神話から哲学へ", pri:2, sub:"神話から哲学へ" },
+      { t:"アテナイ", m:"古代ギリシアの主要なポリスの一つ。民主主義と哲学の中心地。ソクラテス、プラトン、アリストテレスらはアテナイ周辺で活動した。ペロポネソス戦争でスパルタに敗北した。", src:"第2回 神話から哲学へ", pri:2, sub:"神話から哲学へ", cf:["スパルタ"] },
+      { t:"ペロポネソス戦争", m:"古代ギリシアにおけるアテナイとスパルタの戦争。紀元前490～480年に起きた。最終的にはギリシア軍が勝利した。その後、アテナイの文化が花開いた。", src:"第2回 神話から哲学へ", pri:2, sub:"神話から哲学へ" },
+      { t:"アゴラ", m:"古代ギリシアの広場。政治的議論や商取引が行われた。ソクラテスがアゴラで人々と問答を行ったことで有名。民主主義の公共的空間。", src:"ソクラテス", pri:2, sub:"生涯" },
+      { t:"ギムナジオン", m:"古代ギリシアの体育館。人々が体を鍛えるとともに、哲学的議論も行われた。ソクラテスはここでも人々と問答していた。", src:"ソクラテス", pri:2, sub:"生涯" },
+      { t:"リュケイオン", m:"アリストテレスが創設した学園。アテナイに設立され、「ペリパトス（屋根つきの遊歩道）」があり、そこを散歩しながらゼミや議論が行われた。古い時代の図書館や自然科学研究の施設も備えていた。", src:"アリストテレス", pri:2, sub:"生涯", cf:["アカデメイア"] },
+      { t:"博学者", m:"アリストテレスを指す呼び方。論理学、言語学、自然学、心理学、経済学、倫理学、政治学、弁論術、詩学、生物学など、あらゆるジャンルの学問を論じたため、このように称された。", src:"アリストテレス", pri:2, sub:"生涯" },
+      { t:"コペルニクス", m:"ポーランドの天文学者（1473～1543）。著作『天体の回転について』（1543）で地動説を提唱した。地球が太陽の周りを公転するという宇宙観をもたらした。", src:"デカルト・パスカル（宇宙観）", pri:2, sub:"宇宙観の変遷" },
+      { t:"ケプラー", m:"ドイツの天文学者（17世紀）。惑星軌道を「円」ではなく「楕円」としたことで、より正確な地動説を確立した。", src:"デカルト・パスカル（宇宙観）", pri:2, sub:"宇宙観の変遷" },
+      { t:"ガリレオ・ガリレイ", m:"イタリアの物理学者・天文学者（17世紀）。地動説を唱えて教会に幽閉された。「自然という書物は数の言語で書かれている」という名言で知られる。", src:"デカルト・パスカル（宇宙観）", pri:2, sub:"宇宙観の変遷" },
+      { t:"ジョルダノ・ブルーノ", m:"イタリアの哲学者。地動説を唱えて異端で火あぶりの刑死した。宗教と科学の対立を示す悲劇的事例。", src:"デカルト・パスカル（宇宙観）", pri:2, sub:"宇宙観の変遷" },
+      { t:"無限宇宙", m:"宇宙が限りも果てもなく続くという考え方。天動説は有限宇宙を想定していたが、地動説により、宇宙は無限であり中心がないという観点がもたらされた。", src:"デカルト・パスカル（宇宙観）", pri:2, sub:"宇宙観の変遷" },
+      { t:"懐疑主義", m:"「人間知の全てが疑わしい」と主張する哲学的潮流。古代の懐疑主義者たちから継続している。デモクリトスやソフィストが代表。デカルト以降、この克服が哲学の課題となった。", src:"デカルト", pri:2, sub:"古代の懐疑主義", cf:["方法的懐疑"] }
+    ]
+  },
+  {
+    id: "machi", name: "文化とまちづくり", dir: "term",
+    memo: "配布された「まとめ その1・その2」が範囲。赤字（＝空欄）の84問が先に出て、そのあと周辺の51問（自治体名・年号・人物など、逆に空欄にされそうな箇所）が出る。",
+    cards: [
+      { t:"都市問題", m:"「まちづくり」という言葉が登場したのは1952年、その年に発行された（　　）という雑誌で使われたのが始まりである。", src:"まちづくりの基礎", pri:1, cf:["高度成長"] },
+      { t:"高度成長", m:"「まちづくり」が登場した1952年当時は、急激な（　　）によってもたらされた公害や生活環境の変化など、生活をするうえで解決しなければならない問題として山積した時期でもあった。", src:"まちづくりの基礎", pri:1, cf:["都市問題"] },
+      { t:"1980", m:"「まちづくり」という言葉が一般につかわれだしたのは（　　）年代に入ってからである。", src:"まちづくりの基礎", pri:1 },
+      { t:"自立的発展", m:"まちづくりの手法の1つ目は、地域の（　　）を地域固有の資源から考え、地域の再生・発展を考えることである。", src:"まちづくりの基礎", pri:1, cf:["文化化", "連携"] },
+      { t:"地域固有", m:"まちづくりの手法の1つ目は、地域の自立的発展を（　　）の資源から考え、地域の再生・発展を考えることである。", src:"まちづくりの基礎", pri:1, cf:["普遍的"] },
+      { t:"文化化", m:"まちづくりの手法の2つ目は、文明の（　　）を考えることである。", src:"まちづくりの基礎", pri:1, cf:["自立的発展", "連携"] },
+      { t:"普遍的", m:"文明とは、広く共通しているもの、誰もが参加できる（　　）なもの・合理的なもの・機能的なもののことである。", src:"まちづくりの基礎", pri:1, cf:["地域固有"] },
+      { t:"連携", m:"まちづくりの手法の3つ目は、これらを実践するうえで多様な（　　）の可能性を考えることである。", src:"まちづくりの基礎", pri:1, cf:["自立的発展", "文化化"] },
+      { t:"ハード面", m:"「まちづくり」は（　　）の整備だけでなく、空間や環境の整備、ルール作り、イベントや生業の整備、人と人とのコミュニケーションづくりなど、豊かな生活をするうえで必要な整備を全て網羅することでもある。", src:"まちづくりの基礎", pri:1, cf:["経済性"] },
+      { t:"イベントや生業の整備", m:"「まちづくり」はハード面の整備だけでなく、空間や環境の整備、ルール作り、（　　）、人と人とのコミュニケーションづくりなども含む。", src:"まちづくりの基礎", pri:1, cf:["ハード面"] },
+      { t:"経済性", m:"まちづくりにおいて最も重要なことは、まちづくりによって（　　）のアップがみられることである。", src:"まちづくりの基礎", pri:1, cf:["ハード面"] },
+      { t:"トップダウン型", m:"都市計画は国から自治体に対する（　　）で物事が進められる。", src:"まちづくりの基礎", pri:1, cf:["ボトムアップ型"] },
+      { t:"ボトムアップ型", m:"住民参加を前提としている「まちづくり」では、住民や企業などから自治体に向けた（　　）で進めていくことが基本的考え方である。", src:"まちづくりの基礎", pri:1, cf:["トップダウン型"] },
+      { t:"歴史的", m:"地場産業観点でのまちづくりを行う場合、その産業が地場産業となった（　　）な背景やストーリーを紹介する必要がある。", src:"観点別のまちづくり", pri:1 },
+      { t:"多治見市", m:"「陶芸の町」として商店街や駅前広場などの再生を図っている岐阜県（　　）も、地場産業によるまちづくりを進めている。", src:"観点別のまちづくり", pri:1, cf:["篠山市", "小田原市"] },
+      { t:"少子高齢化", m:"子育て観点のまちづくりは、（　　）による人口減少に苦しんでいる多くの地域で行われている。", src:"観点別のまちづくり", pri:1 },
+      { t:"テナントミックス", m:"新潟県新潟市では、閉店が相次ぎシャッター通りと化した長屋を民間が主体となって改修し、（　　）の形で空き店舗を無くした。", src:"観点別のまちづくり", pri:1, cf:["土地活用観点"] },
+      { t:"土地活用観点", m:"新潟市のテナントミックスによる取り組みは、（　　）でのまちづくりである。", src:"観点別のまちづくり", pri:1, cf:["観光関連", "テナントミックス"] },
+      { t:"新規事業", m:"兵庫県篠山市では、城下町にある古民家をホテルなどに再生することで（　　）や雇用を生み出し、若者が戻って来やすい環境づくりを目標にまちづくりを実践している。", src:"観点別のまちづくり", pri:1, cf:["雇用"] },
+      { t:"雇用", m:"兵庫県篠山市では、城下町にある古民家をホテルなどに再生することで新規事業や（　　）を生み出している。", src:"観点別のまちづくり", pri:1, cf:["新規事業"] },
+      { t:"観光関連", m:"地域特有の生活文化や産物、自然、歴史などを地域資源として、まちづくりを実践するのが（　　）でのまちづくりである。", src:"観点別のまちづくり", pri:1, cf:["土地活用観点"] },
+      { t:"千年蔵構想", m:"神奈川県小田原市の（　　）は、地域の観光資源を使って市街地の魅力を高めている代表的な観光関連によるまちづくり例である。", src:"観点別のまちづくり", pri:1, cf:["多治見市"] },
+      { t:"8,000", m:"我が国のジーンズの生産着数の規模は約（　　）万着と推定される。", src:"ジーンズ", pri:1, cf:["3分の1"] },
+      { t:"3分の1", m:"アメリカ合衆国のジーンズは約5〜6億着の規模との調査があり、人口比でみると日本におけるジーンズの普及は、アメリカの（　　）以下ということになる。", src:"ジーンズ", pri:1, cf:["8,000"] },
+      { t:"ジェイコブ・デイヴィス", m:"1870年、仕立て屋の（　　）は、リーバイス社のリーバイ・ストラウスから仕入れたキャンバス生地を用い、銅リベットでポケットの両端を補強した仕事用パンツを制作発売した。", src:"ジーンズ", pri:1, cf:["作業着"] },
+      { t:"作業着", m:"銅リベットで補強した仕事用パンツが鉱夫らの好評を博した。つまり、ジーンズは最初、鉱夫らの（　　）だったのである。", src:"ジーンズ", pri:1, cf:["ジェイコブ・デイヴィス"] },
+      { t:"美濃焼", m:"俗に「日本三大陶磁器」と呼ばれる焼き物は、（　　）・瀬戸焼・有田焼の三種類だと言われる。", src:"美濃焼", pri:1, cf:["陶磁器"] },
+      { t:"平安時代", m:"美濃焼は岐阜県の美濃地方で作られている焼き物でとても歴史が古く、（　　）（1300年の歴史）から灰釉陶器が焼かれていた。", src:"美濃焼", pri:1, cf:["美濃焼"] },
+      { t:"陶磁器", m:"美濃焼の発展の背景には、（　　）の原料となる土が美濃地方にあったことがある。", src:"美濃焼", pri:1, cf:["美濃焼"] },
+      { t:"飛騨川", m:"美濃焼の発展の背景には、土から粘土を精製するのに必要な水が、木曽川や（　　）に囲まれて豊富にあったことがある。", src:"美濃焼", pri:1, cf:["ゆるやか"] },
+      { t:"ゆるやか", m:"美濃地方は山地が多く、窯を作りやすい（　　）な斜面が広がった地形を持っていたことも、美濃焼が栄えた要因である。", src:"美濃焼", pri:1, cf:["飛騨川"] },
+      { t:"阿部平助", m:"今治のタオルは、明治27年に（　　）が白木綿不振の打開策としてタオル織物を作ったことに始まる。", src:"今治タオル", pri:1, cf:["デザインの向上"] },
+      { t:"デザインの向上", m:"今治タオルは大正10年に生産高全国第2位に成長し、その後の設備の近代化、（　　）、アパレル製品への活用などの努力により、現在では全国一のタオル産地となっている。", src:"今治タオル", pri:1, cf:["アパレル製品", "阿部平助"] },
+      { t:"アパレル製品", m:"今治タオルは設備の近代化、デザインの向上、（　　）への活用などの努力により、現在では全国一のタオル産地となっている。", src:"今治タオル", pri:1, cf:["デザインの向上"] },
+      { t:"原料高", m:"今治タオルの生産量は毎年減少気味で、その最大の要因は（　　）に起因している。", src:"今治タオル", pri:1, cf:["インド", "ウクライナ侵攻"] },
+      { t:"インド", m:"タオルをつくる綿糸の価格は、原料の栽培地である（　　）での水害やパキスタンの虫害などで、10年前の倍近くに跳ね上がっている。", src:"今治タオル", pri:1, cf:["パキスタン", "ウクライナ侵攻"] },
+      { t:"パキスタン", m:"タオルをつくる綿糸の価格は、インドでの水害や（　　）の虫害、それにウクライナ侵攻の影響などで高騰している。", src:"今治タオル", pri:1, cf:["インド", "ウクライナ侵攻"] },
+      { t:"ウクライナ侵攻", m:"タオルをつくる綿糸の価格は、インドでの水害やパキスタンの虫害、それに（　　）の影響などで、10年前の倍近くに跳ね上がっている。", src:"今治タオル", pri:1, cf:["インド", "パキスタン"] },
+      { t:"1.26", m:"2022年、日本の合計特殊出生率は7年連続で低下して（　　）となった。", src:"少子化", pri:1, cf:["2.06〜2.07"] },
+      { t:"2.06〜2.07", m:"人口を維持するためには合計特殊出生率が（　　）必要とされ、このままでは間違いなく日本の少子化が進行していくことになる。", src:"少子化", pri:1, cf:["1.26"] },
+      { t:"未婚化", m:"我が国の少子化の原因は大きく分けて2つ挙げられる。1つは（　　）の進行である。", src:"少子化", pri:1, cf:["既婚者"] },
+      { t:"既婚者", m:"我が国の少子化の原因の2つ目は、（　　）の出生数の減少である。", src:"少子化", pri:1, cf:["未婚化"] },
+      { t:"100万組", m:"日本の婚姻件数は、ピーク時の1972年には年間（　　）を超えていた。", src:"少子化", pri:1, cf:["60万組"] },
+      { t:"60万組", m:"日本の婚姻件数は、2018年には（　　）を割り込んでいる。", src:"少子化", pri:1, cf:["100万組"] },
+      { t:"子育て支援", m:"松戸市では、\"子育て環境が充実した家族にとって暮らしやすい街\"として、総合的な（　　）に力を入れ、幅広い施策を実施している。", src:"子育て支援の事例", pri:1, cf:["奈義町子育て応援宣言"] },
+      { t:"奈義町子育て応援宣言", m:"岡山県奈義町では、人口維持を重要課題として（　　）のもとに様々な子育て支援を整備している。", src:"子育て支援の事例", pri:1, cf:["在宅育児支援手当", "不妊治療助成"] },
+      { t:"在宅育児支援手当", m:"岡山県奈義町では、保育園等に入園していない児童の養育を対象にした（　　）や不妊治療助成などの独自施策に取り組んでいる。", src:"子育て支援の事例", pri:1, cf:["不妊治療助成", "奈義町子育て応援宣言"] },
+      { t:"不妊治療助成", m:"岡山県奈義町では、在宅育児支援手当や（　　）などの独自施策に取り組み、若い世代の定着と高い出生数の維持を実現している。", src:"子育て支援の事例", pri:1, cf:["在宅育児支援手当", "奈義町子育て応援宣言"] },
+      { t:"田んぼアート", m:"青森県田舎館村（いなかだてむら）の（　　）の取り組みは、その芸術性の高さが国内で話題となり、全国から年間30万人以上の観光客が訪れている。", src:"地域資源・空き家の事例", pri:1, cf:["妖怪", "黒壁"] },
+      { t:"クラウドファンディング", m:"奈良県明日香村では、（　　）を活用して古民家リノベーション費用や内装・設備費用、運転資金の一部を募った結果、1,500万円の資金調達を達成し、空き家の観光資源化につながっている。", src:"地域資源・空き家の事例", pri:1, cf:["永平寺町版空き家メタバンク"] },
+      { t:"中核病院", m:"秋田県大仙市では、市街地再開発事業により、地域の（　　）や子育て支援施設などの都市機能をJR大曲駅前に集約させた。", src:"地域資源・空き家の事例", pri:1, cf:["子育て支援施設", "リノベーション"] },
+      { t:"子育て支援施設", m:"秋田県大仙市では、市街地再開発事業により、地域の中核病院や（　　）などの都市機能をJR大曲駅前に集約させた。", src:"地域資源・空き家の事例", pri:1, cf:["中核病院", "リノベーション"] },
+      { t:"リノベーション", m:"秋田県大仙市では、商店街と地域住民の交流施設を兼ねる「まちなか拠点施設」として、地域一帯の（　　）に成功している。", src:"地域資源・空き家の事例", pri:1, cf:["中核病院", "テナントミックス"] },
+      { t:"黒壁", m:"滋賀県長浜市には、黒漆喰を用いた（　　）と呼ばれる建造物をメインに歴史ある街並みが存在している。", src:"地域資源・空き家の事例", pri:1, cf:["ガラス", "田んぼアート"] },
+      { t:"ガラス", m:"長浜市では、黒壁を生かした街並み整備とともに、（　　）をテーマにした新たな産業の確立を目指すことで、空き家を新規出店者へ店舗として貸し出し、新規出店の促進に貢献している。", src:"地域資源・空き家の事例", pri:1, cf:["黒壁"] },
+      { t:"6件", m:"長浜市の空き店舗の活用・既存店舗のリノベーション件数は、平成20年の（　　）から83件にまで増加している。", src:"地域資源・空き家の事例", pri:1, cf:["83件"], warn:true, note:"写真の右端が切れており、83件になった年（平成◯年）が読めない。撮り直しで確認したい。" },
+      { t:"83件", m:"長浜市の空き店舗の活用・既存店舗のリノベーション件数は、平成20年の6件から（　　）にまで増加している。", src:"地域資源・空き家の事例", pri:1, cf:["6件"] },
+      { t:"妖怪", m:"鳥取県境港市では、「ゲゲゲの鬼太郎」の作者である水木しげる氏の協力のもと、（　　）をモチーフとした街の魅力を全面に押し出した観光アピールに向けた取り組みを実施した。", src:"地域資源・空き家の事例", pri:1, cf:["水木しげるロード", "田んぼアート"] },
+      { t:"水木しげるロード", m:"鳥取県境港市では平成5年に（　　）を整備し、サポーターの出資による妖怪ブロンズ像の設置をするなどして、地域活性化を図った。", src:"地域資源・空き家の事例", pri:1, cf:["妖怪"], warn:true, note:"写真の右端が切れており、平成23年に達成した入込客数（◯万人）が読めない。撮り直しで確認したい。" },
+      { t:"永平寺町版空き家メタバンク", m:"永平寺町は生成AIを使って空き家をリフォームしたあとのイメージ画像などをつくり活用を進める実証事業を始めた。これは（　　）と名付けた取り組みである。", src:"地域資源・空き家の事例", pri:1, cf:["クラウドファンディング"] },
+      { t:"税込み収入", m:"実収入とは、一般に言われる（　　）であり、世帯員全員の現金収入を合計したものである。", src:"家計・消費", pri:1, cf:["現金収入"] },
+      { t:"現金収入", m:"実収入とは、一般に言われる税込み収入であり、世帯員全員の（　　）を合計したものである。", src:"家計・消費", pri:1, cf:["税込み収入"] },
+      { t:"消費行動", m:"経常収入とは、家計の（　　）に大きな影響を与える定期性あるいは再現性のある収入である。", src:"家計・消費", pri:1, cf:["定期性", "再現性"] },
+      { t:"定期性", m:"経常収入とは、家計の消費行動に大きな影響を与える（　　）あるいは再現性のある収入である。", src:"家計・消費", pri:1, cf:["再現性", "消費行動"] },
+      { t:"再現性", m:"経常収入とは、家計の消費行動に大きな影響を与える定期性あるいは（　　）のある収入である。", src:"家計・消費", pri:1, cf:["定期性", "消費行動"] },
+      { t:"節約志向", m:"最近の消費動向としては、（　　）とプレミアム消費が共存している。", src:"家計・消費", pri:1, cf:["プレミアム消費", "経済的メリット"] },
+      { t:"プレミアム消費", m:"最近の消費動向としては、節約志向と（　　）が共存している。", src:"家計・消費", pri:1, cf:["節約志向", "経済的メリット"] },
+      { t:"経済的メリット", m:"最近の消費動向としては、（　　）を重視しながら、自分にとって価値あるものには積極的に投資する選択的な消費スタイルが定着している。", src:"家計・消費", pri:1, cf:["節約志向", "プレミアム消費"] },
+      { t:"企業ニーズ", m:"新潟県の食のブランド形成では、「新潟県農業総合研究所食品研究センター」が業界団体や企業と密接に連携し、（　　）に対応した技術研究を推し進めた。", src:"ブランド形成", pri:1, cf:["移転する"] },
+      { t:"移転する", m:"新潟県の食のブランド形成では、研究成果を民間に速やかに（　　）仕組みが構築されていったことが成功要因である。", src:"ブランド形成", pri:1, cf:["企業ニーズ"] },
+      { t:"葛飾北斎", m:"小布施町ブランド形成の成功要因の1つ目は、（　　）に代表される歴史・文化資源の有効活用である。", src:"ブランド形成", pri:1, cf:["観光拠点整備", "花のまちづくり"] },
+      { t:"観光拠点整備", m:"小布施町ブランド形成の成功要因の2つ目は、（　　）と、菓子メーカーの洗練されたデザインによる高水準の店舗立地が観光地としての魅力度アップに繋がったことである。", src:"ブランド形成", pri:1, cf:["葛飾北斎", "花のまちづくり"] },
+      { t:"花のまちづくり", m:"小布施町ブランド形成の成功要因の3つ目は、（　　）推進（住民によるオープンガーデニング）が観光客の注目を集めたことである。", src:"ブランド形成", pri:1, cf:["葛飾北斎", "担い手である"] },
+      { t:"担い手である", m:"小布施町では町民が地域づくりに対し（　　）という誇りを持ち、その相乗効果で文化活動、地域づくりへの取り組みがさらに活発になった。", src:"ブランド形成", pri:1, cf:["花のまちづくり", "地域企業"] },
+      { t:"地域企業", m:"小布施町ブランド形成の成功要因の4つ目は、（　　）の地域づくり・ブランド化に向けた積極的な取り組みが図られたことである。", src:"ブランド形成", pri:1, cf:["株式会社ア・ラ・小布施", "担い手である"] },
+      { t:"株式会社ア・ラ・小布施", m:"小布施町ブランド形成の成功要因の5つ目は、まちづくり会社（　　）の地道なまちづくり活動である。", src:"ブランド形成", pri:1, cf:["地域企業"] },
+      { t:"1100", m:"新幹線の年間の利用者数は、運行初年度では約（　　）万人だった。", src:"新幹線", pri:1, cf:["1億"] },
+      { t:"1億", m:"新幹線の年間の利用者数は、運行初年度の約1100万人から、10年後には（　　）人を突破した。", src:"新幹線", pri:1, cf:["1100"] },
+      { t:"日帰り", m:"東京〜大阪間を（　　）で出張するビジネスマンが急増するなど、東海道新幹線は日本の高度経済成長を根底から支えた。", src:"新幹線", pri:1, cf:["1億"] },
+      { t:"経済効果", m:"今回の北陸新幹線敦賀開業も多様な（　　）が指摘されており、地域経済発展には必要不可欠な要素となっている。", src:"新幹線", pri:1, cf:["県外資本企業の撤退"] },
+      { t:"県外資本企業の撤退", m:"新幹線は大きな経済効果を生む反面デメリットも存在する。例えば観光客の日帰り化、（　　）、在来線利用客数の減少、在来線駅周辺商業機能の衰退などの問題である。", src:"新幹線", pri:1, cf:["経済効果", "日帰り"] },
+      { t:"現状", m:"まちづくりによる活性化策を検討する場合、最も重要な手法は、まちづくりを実践する地域の（　　）から課題を抽出することから始めなければならない。", src:"まちづくりの手順", pri:1, cf:["方向", "方策"] },
+      { t:"方向", m:"まちづくりに際しての（　　）性と方策を検討することから始めなければならない。", src:"まちづくりの手順", pri:1, cf:["方策", "現状"] },
+      { t:"方策", m:"まちづくりに際しての方向性と（　　）を検討することから始めなければならない。", src:"まちづくりの手順", pri:1, cf:["方向", "現状"] },
+      { t:"1952年", m:"「まちづくり」という言葉が登場したのは（　　）、その年に発行された『都市問題』という雑誌で使われたのが始まりである。", src:"まちづくりの基礎", pri:2, cf:["1980"] },
+      { t:"新潟市", m:"閉店が相次ぎシャッター通りと化した長屋を民間が主体となって改修し、テナントミックスの形で空き店舗を無くしたのは新潟県（　　）である。", src:"観点別のまちづくり", pri:2, cf:["篠山市", "多治見市", "小田原市"] },
+      { t:"篠山市", m:"城下町にある古民家をホテルなどに再生することで新規事業や雇用を生み出し、若者が戻って来やすい環境づくりを目標にまちづくりを実践しているのは兵庫県（　　）である。", src:"観点別のまちづくり", pri:2, cf:["新潟市", "多治見市", "小田原市"] },
+      { t:"小田原市", m:"千年蔵構想により、地域の観光資源を使って市街地の魅力を高めている代表的な観光関連のまちづくり例は神奈川県（　　）である。", src:"観点別のまちづくり", pri:2, cf:["篠山市", "新潟市", "多治見市"] },
+      { t:"5〜6億着", m:"アメリカ合衆国のジーンズの規模は約（　　）との調査があり、人口比でみると日本の普及はアメリカの3分の1以下ということになる。", src:"ジーンズ", pri:2, cf:["8,000"] },
+      { t:"1870年", m:"ゴールドラッシュに沸く北米で、仕立て屋のジェイコブ・デイヴィスが銅リベットで補強した仕事用パンツを制作発売したのは（　　）である。", src:"ジーンズ", pri:2, cf:["1952年"] },
+      { t:"リーバイ・ストラウス", m:"ジェイコブ・デイヴィスは、既に設立されていたリーバイス社の（　　）から仕入れたキャンバス生地を用いて仕事用パンツを作った。", src:"ジーンズ", pri:2, cf:["ジェイコブ・デイヴィス"] },
+      { t:"ワークパンツ", m:"銅リベットでポケットの両端を補強した仕事用パンツ（　　）が、鉱夫らの好評を博した。", src:"ジーンズ", pri:2, cf:["作業着"] },
+      { t:"瀬戸焼・有田焼", m:"「日本三大陶磁器」と呼ばれる焼き物は、美濃焼と（　　）の三種類だと言われる。", src:"美濃焼", pri:2, cf:["美濃焼"] },
+      { t:"灰釉陶器", m:"美濃焼はとても歴史が古く、平安時代（1300年の歴史）から（　　）が焼かれていた。", src:"美濃焼", pri:2, cf:["陶磁器"] },
+      { t:"木曽川", m:"美濃焼の発展の背景には、土から粘土を精製するのに必要な水が、（　　）や飛騨川に囲まれて豊富にあったことがある。", src:"美濃焼", pri:2, cf:["飛騨川"] },
+      { t:"江戸時代", m:"（　　）になると、江戸を中心に東日本からの陶器の注文が多くなったことも、美濃焼が栄えた要因である。", src:"美濃焼", pri:2, cf:["平安時代"] },
+      { t:"明治27年", m:"今治のタオルは、（　　）に阿部平助が白木綿不振の打開策としてタオル織物を作ったことに始まる。", src:"今治タオル", pri:2, cf:["大正10年"] },
+      { t:"大正10年", m:"今治タオルは（　　）に、大阪についで生産高全国第2位に成長した。", src:"今治タオル", pri:2, cf:["明治27年"] },
+      { t:"白木綿", m:"今治のタオルは、明治27年に阿部平助が（　　）不振の打開策としてタオル織物を作ったことに始まる。", src:"今治タオル", pri:2, cf:["阿部平助"] },
+      { t:"綿糸", m:"今治タオルの生産量減少の最大の要因は原料高である。タオルをつくる（　　）の価格が、10年前の倍近くに跳ね上がっている。", src:"今治タオル", pri:2, cf:["原料高"] },
+      { t:"合計特殊出生率", m:"2022年、日本の（　　）は7年連続で低下して1.26となった。", src:"少子化", pri:2, cf:["1.26"] },
+      { t:"7年連続", m:"2022年、日本の合計特殊出生率は（　　）で低下して1.26となった。", src:"少子化", pri:2, cf:["1.26"] },
+      { t:"1972年", m:"日本の婚姻件数は、ピーク時の（　　）には年間100万組を超えていた。", src:"少子化", pri:2, cf:["2018年", "100万組"] },
+      { t:"2018年", m:"日本の婚姻件数は、（　　）には60万組を割り込んでいる。", src:"少子化", pri:2, cf:["1972年", "60万組"] },
+      { t:"松戸市", m:"\"子育て環境が充実した家族にとって暮らしやすい街\"として、総合的な子育て支援に力を入れ幅広い施策を実施しているのは（　　）である。", src:"子育て支援の事例", pri:2, cf:["奈義町", "大仙市"] },
+      { t:"奈義町", m:"人口維持を重要課題として子育て応援宣言のもとに様々な子育て支援を整備し、在宅育児支援手当や不妊治療助成などの独自施策に取り組んでいるのは岡山県（　　）である。", src:"子育て支援の事例", pri:2, cf:["松戸市", "田舎館村"] },
+      { t:"田舎館村", m:"田んぼアートの取り組みが芸術性の高さで国内の話題となり、全国から年間30万人以上の観光客が訪れているのは青森県（　　）である。", src:"地域資源・空き家の事例", pri:2, cf:["明日香村", "境港市", "永平寺町"] },
+      { t:"30万人", m:"青森県田舎館村の田んぼアートには、全国から年間（　　）以上の観光客が訪れている。", src:"地域資源・空き家の事例", pri:2, cf:["1,500万円"] },
+      { t:"明日香村", m:"クラウドファンディングを活用して1,500万円の資金調達を達成し、空き家の観光資源化につなげたのは奈良県（　　）である。", src:"地域資源・空き家の事例", pri:2, cf:["田舎館村", "永平寺町", "境港市"] },
+      { t:"1,500万円", m:"奈良県明日香村ではクラウドファンディングにより（　　）の資金調達を達成し、空き家の観光資源化につながっている。", src:"地域資源・空き家の事例", pri:2, cf:["30万人"] },
+      { t:"大仙市", m:"市街地再開発事業により、中核病院や子育て支援施設などの都市機能をJR大曲駅前に集約させたのは秋田県（　　）である。", src:"地域資源・空き家の事例", pri:2, cf:["長浜市", "明日香村"] },
+      { t:"まちなか拠点施設", m:"秋田県大仙市では、商店街と地域住民の交流施設を兼ねる「（　　）」として地域一帯のリノベーションに成功している。", src:"地域資源・空き家の事例", pri:2, cf:["リノベーション"] },
+      { t:"長浜市", m:"黒漆喰を用いた黒壁と呼ばれる建造物をメインに歴史ある街並みが存在し、ガラスをテーマにした産業の確立を目指しているのは滋賀県（　　）である。", src:"地域資源・空き家の事例", pri:2, cf:["大仙市", "境港市", "田舎館村"] },
+      { t:"黒漆喰", m:"滋賀県長浜市には、（　　）を用いた黒壁と呼ばれる建造物をメインに歴史ある街並みが存在している。", src:"地域資源・空き家の事例", pri:2, cf:["黒壁"] },
+      { t:"境港市", m:"「ゲゲゲの鬼太郎」の作者の協力のもと、妖怪をモチーフとした観光アピールを実施し、水木しげるロードを整備したのは鳥取県（　　）である。", src:"地域資源・空き家の事例", pri:2, cf:["長浜市", "田舎館村", "永平寺町"] },
+      { t:"水木しげる", m:"鳥取県境港市の出身者で「ゲゲゲの鬼太郎」の作者である（　　）氏の協力のもと、妖怪をモチーフとした観光アピールが実施された。", src:"地域資源・空き家の事例", pri:2, cf:["妖怪", "水木しげるロード"] },
+      { t:"平成5年", m:"鳥取県境港市が水木しげるロードを整備したのは（　　）である。", src:"地域資源・空き家の事例", pri:2, cf:["平成20年"] },
+      { t:"妖怪ブロンズ像", m:"水木しげるロードのなかには、サポーターの出資による（　　）の設置をするなどして、地域活性化を図った。", src:"地域資源・空き家の事例", pri:2, cf:["水木しげるロード", "妖怪"] },
+      { t:"平成20年", m:"長浜市の空き店舗の活用・既存店舗のリノベーション件数は、（　　）の6件から83件にまで増加している。", src:"地域資源・空き家の事例", pri:2, cf:["平成5年", "6件"] },
+      { t:"永平寺町", m:"生成AIを使って空き家をリフォームしたあとのイメージ画像などをつくり活用を進める実証事業を始め、「版空き家メタバンク」と名付けた取り組みを行っているのは（　　）である。", src:"地域資源・空き家の事例", pri:2, cf:["明日香村", "境港市", "田舎館村"] },
+      { t:"生成AI", m:"永平寺町は（　　）を使って空き家をリフォームしたあとのイメージ画像などをつくり、活用を進める実証事業を始めた。", src:"地域資源・空き家の事例", pri:2, cf:["永平寺町版空き家メタバンク"] },
+      { t:"坂井市", m:"永平寺町は（　　）の企業と、空き家の実証事業を共同で行う協定書を取り交わした。", src:"地域資源・空き家の事例", pri:2, cf:["永平寺町"] },
+      { t:"実収入", m:"（　　）とは、一般に言われる税込み収入であり、世帯員全員の現金収入を合計したものである。", src:"家計・消費", pri:2, cf:["経常収入"] },
+      { t:"経常収入", m:"（　　）とは、家計の消費行動に大きな影響を与える定期性あるいは再現性のある収入である。", src:"家計・消費", pri:2, cf:["実収入"] },
+      { t:"事業・内職収入", m:"経常収入は、勤め先収入、（　　）及び「他の経常収入」から成り立っている。", src:"家計・消費", pri:2, cf:["経常収入"] },
+      { t:"選択的な消費", m:"最近の消費動向は、経済的メリットを重視しながら自分にとって価値あるものには積極的に投資する（　　）スタイルが定着している。", src:"家計・消費", pri:2, cf:["節約志向", "プレミアム消費"] },
+      { t:"新潟県農業総合研究所食品研究センター", m:"新潟県の食のブランド形成では、（　　）が業界団体や企業と密接に連携し、企業ニーズに対応した技術研究を推し進めた。", src:"ブランド形成", pri:2, cf:["企業ニーズ"] },
+      { t:"自然環境と食文化", m:"新潟県で食のブランド形成が成功した要因には、地域が産品を産み出すための恵まれた（　　）があったことが挙げられる。", src:"ブランド形成", pri:2, cf:["企業ニーズ"] },
+      { t:"小布施町", m:"葛飾北斎に代表される歴史・文化資源の有効活用、観光拠点整備、花のまちづくり推進などでブランド形成に成功した長野県の町は（　　）である。", src:"ブランド形成", pri:2, cf:["長浜市", "境港市"] },
+      { t:"オープンガーデニング", m:"小布施町の「花のまちづくり」推進は、住民による（　　）であり、観光客の注目を集めた。", src:"ブランド形成", pri:2, cf:["花のまちづくり"] },
+      { t:"基盤インフラ", m:"高速体系のかなめでもある新幹線はきわめて重要な（　　）であり、日本経済の活性化に大きく貢献している。", src:"新幹線", pri:2, cf:["経済効果"] },
+      { t:"東海道新幹線", m:"東京〜大阪間を日帰りで出張するビジネスマンが急増するなど、（　　）は日本の高度経済成長を根底から支えた。", src:"新幹線", pri:2, cf:["北陸新幹線"] },
+      { t:"北陸新幹線", m:"今回の（　　）敦賀開業も多様な経済効果が指摘されており、地域経済発展には必要不可欠な要素となっている。", src:"新幹線", pri:2, cf:["東海道新幹線"] },
+      { t:"日帰り化", m:"新幹線のデメリットの例として、観光客の（　　）、県外資本企業の撤退、在来線利用客数の減少などがある。", src:"新幹線", pri:2, cf:["県外資本企業の撤退"] },
+      { t:"在来線駅周辺商業機能の衰退", m:"新幹線のデメリットの例として、観光客の日帰り化、県外資本企業の撤退、在来線利用客数の減少、（　　）などがある。", src:"新幹線", pri:2, cf:["県外資本企業の撤退", "日帰り化"] }
+    ]
+  }
+];
+
+/* 科目をまたいで出てくる用語（社会調査法と社会学入門は範囲が重なる） */
+const DUP = {};
+DECKS.forEach(d => d.cards.forEach(c => { (DUP[c.t] = DUP[c.t] || []).push(d.name); }));
+
+/* ---------------------------- 状態 ---------------------------- */
+const STORE = "test-taisaku-v2";
+let stats = load();           // stats[deckId][cardIdx] = {seen,ok,wrong,pending,picks:{otherIdx:n}}
+let deckIdx = 0;
+let mode = "all";             // "all" | "fix"
+let queue = [];
+let qi = 0;
+let choices = [];
+let answered = false;
+let sess = { ok:0, ng:0 };
+let autoTimer = null;
+
+function load() { try { return JSON.parse(localStorage.getItem(STORE)) || {}; } catch { return {}; } }
+function save() { try { localStorage.setItem(STORE, JSON.stringify(stats)); } catch {} }
+const deck = () => DECKS[deckIdx];
+function st(dId, i) {
+  stats[dId] = stats[dId] || {};
+  stats[dId][i] = stats[dId][i] || { seen:0, ok:0, wrong:0, pending:false, picks:{} };
+  return stats[dId][i];
+}
+const $ = id => document.getElementById(id);
+// 優先度 1＝プリントの空欄そのもの（出ると分かっている） 2＝その周辺の用語
+const pri = c => c.pri || 2;
+const blankCount = d => d.cards.filter(c => pri(c) === 1).length;
+const esc = s => String(s).replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+function shuffle(a) { for (let i=a.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+/* ------------------------ 選択肢をつくる ------------------------ */
+// 混同しやすい用語を最優先で誤答に入れる。次に同じ回、最後に全体からランダム
+function makeChoices(i) {
+  const d = deck(), c = d.cards[i], pool = [];
+  const push = j => { if (j >= 0 && j !== i && !pool.includes(j)) pool.push(j); };
+  (c.cf || []).forEach(name => push(d.cards.findIndex(x => x.t === name)));
+  shuffle(d.cards.map((x,j) => x.src === c.src ? j : -1).filter(j => j >= 0)).forEach(push);
+  shuffle(d.cards.map((_,j) => j)).forEach(push);
+  return shuffle([i, ...pool.slice(0, 3)]);
+}
+
+/* ---------------------------- 出題 ---------------------------- */
+function buildQueue() {
+  const d = deck();
+  let idxs = d.cards.map((_,i) => i);
+  if (mode === "fix")   idxs = idxs.filter(i => st(d.id, i).pending);
+  if (mode === "blank") idxs = idxs.filter(i => pri(d.cards[i]) === 1);
+  // 空欄（試験に出ると分かっている箇所）を先に、その中で苦手なものから
+  idxs.sort((a,b) => {
+    const A = st(d.id,a), B = st(d.id,b);
+    return pri(d.cards[a]) - pri(d.cards[b])
+        || (B.wrong - B.ok) - (A.wrong - A.ok)
+        || Math.random() - .5;
+  });
+  queue = idxs;
+  qi = 0;
+  sess = { ok:0, ng:0 };
+  showQuestion();
+}
+
+function showQuestion() {
+  clearTimeout(autoTimer);
+  answered = false;
+  $("actionBar").classList.add("hidden");
+  const d = deck();
+  const dirLabel = d.dir === "term" ? "説明→用語" : "用語→意味";
+  $("modeLabel").textContent = mode === "fix" ? "まちがい直し" : mode === "blank" ? "空欄だけ" : dirLabel;
+  $("modeLabel").classList.toggle("fix", mode === "fix");
+  $("counter").textContent = `${Math.min(qi+1, queue.length)} / ${queue.length}`;
+  $("barFill").style.width = queue.length ? (qi / queue.length * 100) + "%" : "0%";
+
+  if (qi >= queue.length) return showDone();
+
+  $("stage").classList.remove("hidden");
+  $("doneBox").classList.add("hidden");
+  $("after").classList.add("hidden");
+  $("noteBox").classList.add("hidden");
+
+  const i = queue[qi], c = d.cards[i];
+  choices = makeChoices(i);
+
+  const isBlank = pri(c) === 1;
+  $("stage").classList.toggle("flagged", !!c.warn);
+  $("stage").classList.toggle("blank", isBlank);
+  $("cardFlag").classList.toggle("hidden", !c.warn);
+  $("cardBlank").classList.toggle("hidden", !isBlank);
+  $("cardSrc").textContent = (c.src || "") + (c.sub ? "　" + c.sub : "");
+  $("promptLabel").textContent = isBlank ? "カッコに入る語は？"
+    : d.dir === "term" ? "この説明にあたる用語は？" : "この用語の意味は？";
+
+  const showTerm = d.dir === "meaning";
+  $("promptTerm").classList.toggle("hidden", !showTerm);
+  $("promptMeaning").classList.toggle("hidden", showTerm);
+  if (showTerm) $("promptTerm").textContent = c.t; else $("promptMeaning").textContent = c.m;
+
+  const box = $("choices");
+  box.innerHTML = "";
+  choices.forEach((j, n) => {
+    const b = document.createElement("button");
+    b.className = "choice";
+    b.innerHTML = `<span class="no">${n+1}</span><span class="body ${d.dir === "term" ? "t" : ""}">${esc(d.dir === "term" ? d.cards[j].t : d.cards[j].m)}</span>`;
+    b.onclick = () => answer(n);
+    box.appendChild(b);
+  });
+}
+
+function answer(n) {
+  if (answered) return;
+  answered = true;
+  const d = deck(), i = queue[qi], picked = choices[n], correct = picked === i;
+  const s = st(d.id, i);
+  s.seen++;
+  if (correct) { s.ok++; s.pending = false; sess.ok++; }
+  else {
+    s.wrong++; s.pending = true; sess.ng++;
+    s.picks[picked] = (s.picks[picked] || 0) + 1;
+  }
+  save();
+
+  const btns = [...$("choices").children];
+  btns.forEach((b, k) => {
+    b.disabled = true;
+    if (choices[k] === i) {
+      b.classList.add("correct");
+      b.insertAdjacentHTML("beforeend", `<span class="mark">正解</span>`);
+    } else if (k === n) {
+      b.classList.add("picked-wrong");
+      b.insertAdjacentHTML("beforeend", `<span class="mark">これを選んだ</span>`);
+    }
+  });
+
+  const c = d.cards[i];
+  const also = (DUP[c.t] || []).filter(n => n !== d.name);
+  // 空欄カードは問題文がすでに本文なので、答え合わせでは用語の意味のほうを出す
+  const body = pri(c) === 1 ? (c.def || "") : c.m;
+  $("fullAnswer").innerHTML = `<b>${esc(c.t)}</b>${body ? "　" + esc(body) : ""}`
+    + (also.length ? `<span class="pill mid" style="margin-left:.5rem">${esc(also.join("・"))}にも出る</span>` : "");
+  if (c.note) { $("noteBox").textContent = c.note; $("noteBox").classList.remove("hidden"); }
+  $("after").classList.remove("hidden");
+  $("actionBar").classList.remove("hidden");
+
+  // 正解なら少し見せて自動で次へ。間違えたときは止まって読ませる
+  if (correct) autoTimer = setTimeout(nextQuestion, 1000);
+}
+
+function nextQuestion() {
+  clearTimeout(autoTimer);
+  qi++;
+  showQuestion();
+}
+
+function showDone() {
+  $("stage").classList.add("hidden");
+  $("actionBar").classList.add("hidden");
+  $("doneBox").classList.remove("hidden");
+  const total = sess.ok + sess.ng;
+  const pct = total ? Math.round(sess.ok / total * 100) : 0;
+  $("doneTitle").textContent = mode === "fix" ? "まちがい直し、ここまで。" : `${deck().name}　一周した。`;
+  $("doneScore").innerHTML = total ? `${pct}<small>％　${sess.ok}/${total}問</small>` : "—";
+  const left = deck().cards.filter((_,i) => st(deck().id, i).pending).length;
+  $("doneHint").textContent = left ? `まだ ${left} 問が「間違えたまま」になっている。` : "取りこぼしはゼロ。";
+  $("fixBtn").classList.toggle("hidden", left === 0);
+  renderTabs();
+}
+
+/* ---------------------------- タブ ---------------------------- */
+function renderTabs() {
+  const box = $("tabs");
+  box.innerHTML = "";
+  DECKS.forEach((d, n) => {
+    const bad = d.cards.filter((_,i) => (stats[d.id]?.[i]?.pending)).length;
+    const b = document.createElement("button");
+    b.className = "tab";
+    b.setAttribute("role", "tab");
+    b.setAttribute("aria-selected", n === deckIdx);
+    const nb = blankCount(d);
+    b.innerHTML = `${esc(d.name)}<span class="cnt">${bad ? "×" + bad : nb ? "空欄" + nb : d.cards.length + "問"}</span>`;
+    b.onclick = () => { deckIdx = n; mode = "all"; buildQueue(); renderTabs(); if (!$("statsView").classList.contains("hidden")) renderStats(); };
+    box.appendChild(b);
+  });
+  $("deckTitle").textContent = deck().name;
+  const memo = deck().memo;
+  $("deckMemo").textContent = memo || "";
+  $("deckMemo").classList.toggle("hidden", !memo);
+}
+
+/* ---------------------------- 分析 ---------------------------- */
+function sev(rate) { return rate >= 80 ? "sev-ok" : rate >= 60 ? "sev-mid" : "sev-bad"; }
+
+function renderStats() {
+  // 科目ごと
+  const sub = $("bySubject");
+  sub.innerHTML = "";
+  DECKS.forEach(d => {
+    let ok = 0, seen = 0, bok = 0, bseen = 0, bleft = 0;
+    d.cards.forEach((c,i) => {
+      const s = stats[d.id]?.[i];
+      if (s) { ok += s.ok; seen += s.seen; }
+      if (pri(c) === 1) {
+        if (s) { bok += s.ok; bseen += s.seen; }
+        if (!s || !s.ok) bleft++;
+      }
+    });
+    const rate = seen ? Math.round(ok / seen * 100) : 0;
+    const brate = bseen ? Math.round(bok / bseen * 100) : 0;
+    const nb = blankCount(d);
+    sub.insertAdjacentHTML("beforeend", `
+      <div class="row">
+        <span class="lbl">${esc(d.name)}</span>
+        <span class="val">${seen ? rate + "%" : "未着手"}　${seen}問</span>
+        <span class="track ${sev(rate)}"><i style="width:${seen ? rate : 0}%"></i></span>
+        ${nb ? `<span class="sub">空欄 ${nb}問中 ${bseen ? `正答率${brate}%、` : ""}<em>まだ一度も正解していないのが ${bleft}問</em></span>` : ""}
+      </div>`);
+  });
+
+  const d = deck(), sd = stats[d.id] || {};
+
+  // 取り違えペア
+  const conf = [];
+  Object.keys(sd).forEach(i => {
+    const s = sd[i];
+    Object.keys(s.picks || {}).forEach(j => {
+      if (d.cards[i] && d.cards[j]) conf.push({ a: d.cards[i].t, b: d.cards[j].t, n: s.picks[j], src: d.cards[i].src });
+    });
+  });
+  conf.sort((x,y) => y.n - x.n);
+  const cbox = $("confusions");
+  cbox.innerHTML = "";
+  $("confEmpty").classList.toggle("hidden", conf.length > 0);
+  conf.slice(0, 8).forEach(c => {
+    cbox.insertAdjacentHTML("beforeend", `
+      <div class="row">
+        <span class="lbl"><span class="q">${esc(c.a)}</span> を <span class="q">${esc(c.b)}</span> と取り違え</span>
+        <span class="val">${c.n}回</span>
+        <span class="sub">${esc(c.src)}</span>
+      </div>`);
+  });
+
+  // 落としている用語
+  const weak = Object.keys(sd).map(i => ({ i:+i, ...sd[i] })).filter(s => s.wrong > 0);
+  weak.sort((a,b) => b.wrong - a.wrong || a.ok - b.ok);
+  const wbox = $("weakTerms");
+  wbox.innerHTML = "";
+  $("weakEmpty").classList.toggle("hidden", weak.length > 0);
+  weak.slice(0, 12).forEach(s => {
+    const c = d.cards[s.i];
+    if (!c) return;
+    const rate = s.seen ? Math.round(s.ok / s.seen * 100) : 0;
+    wbox.insertAdjacentHTML("beforeend", `
+      <div class="row">
+        <span class="lbl"><span class="q">${esc(c.t)}</span> ${s.pending ? '<span class="pill bad">未回収</span>' : '<span class="pill ok">直した</span>'}</span>
+        <span class="val">${s.wrong}回ミス／${s.seen}回中</span>
+        <span class="track ${sev(rate)}"><i style="width:${rate}%"></i></span>
+        <span class="sub">${esc(c.src)}</span>
+      </div>`);
+  });
+
+  // 単元ごと
+  const bySrc = {};
+  d.cards.forEach((c,i) => {
+    const s = sd[i]; if (!s || !s.seen) return;
+    bySrc[c.src] = bySrc[c.src] || { ok:0, seen:0 };
+    bySrc[c.src].ok += s.ok; bySrc[c.src].seen += s.seen;
+  });
+  const keys = Object.keys(bySrc).sort((a,b) => (bySrc[a].ok/bySrc[a].seen) - (bySrc[b].ok/bySrc[b].seen));
+  const sbox = $("bySrc");
+  sbox.innerHTML = "";
+  $("srcEmpty").classList.toggle("hidden", keys.length > 0);
+  keys.forEach(k => {
+    const v = bySrc[k], rate = Math.round(v.ok / v.seen * 100);
+    sbox.insertAdjacentHTML("beforeend", `
+      <div class="row">
+        <span class="lbl">${esc(k)}</span>
+        <span class="val">${rate}%　${v.seen}問</span>
+        <span class="track ${sev(rate)}"><i style="width:${rate}%"></i></span>
+      </div>`);
+  });
+
+  // 要確認
+  const fbox = $("flagList");
+  fbox.innerHTML = "";
+  const flagged = d.cards.filter(c => c.warn);
+  $("flagEmpty").classList.toggle("hidden", flagged.length > 0);
+  flagged.forEach(c => {
+    fbox.insertAdjacentHTML("beforeend", `
+      <div class="row">
+        <span class="lbl"><span class="q">${esc(c.t)}</span></span>
+        <span class="val">${esc(c.src)}</span>
+        <span class="sub">${esc(c.m)}</span>
+      </div>`);
+  });
+}
+
+/* -------------------- Claudeに渡す文をつくる -------------------- */
+function buildPrompt(all) {
+  const targets = all ? DECKS : [deck()];
+  const blocks = [];
+
+  targets.forEach(d => {
+    const sd = stats[d.id] || {};
+    const missed = Object.keys(sd).map(i => ({ i:+i, ...sd[i] })).filter(s => s.wrong > 0);
+    if (!missed.length) return;
+    missed.sort((a,b) => b.wrong - a.wrong);
+
+    const lines = missed.slice(0, 15).map(s => {
+      const c = d.cards[s.i];
+      if (!c) return "";
+      const picks = Object.keys(s.picks || {})
+        .sort((x,y) => s.picks[y] - s.picks[x])
+        .map(j => d.cards[j] && `「${d.cards[j].t}」と${s.picks[j]}回`)
+        .filter(Boolean).join("、");
+      return `- ${c.t}（${c.src}）：${s.wrong}回まちがえた${picks ? `。取り違えた相手は ${picks}` : ""}`;
+    }).filter(Boolean);
+
+    blocks.push(`■ ${d.name}\n${lines.join("\n")}`);
+  });
+
+  if (!blocks.length) {
+    return "まだ間違いの記録がありません。何問か解いてから、もう一度このボタンを押してください。";
+  }
+
+  return `大学の試験勉強で、4択の一問一答を解いています。以下が私のまちがえた用語と、そのとき取り違えた相手です。
+
+${blocks.join("\n\n")}
+
+これをふまえて、次のことを教えてください。
+
+1. 取り違えているペアそれぞれについて、なぜ混同しやすいのか、どこが決定的に違うのかを説明してください。「AはXだがBはYだ」という形で、対比がはっきりわかるように書いてください。
+2. 試験で似た選択肢が並んだときに、どこを見れば見分けられるか、判別のポイントを一言で示してください。
+3. まちがえた用語全体を眺めて、私がどういう種類の理解を落としているのか（用語の定義そのものなのか、似た概念の区別なのか、具体例との結びつきなのか）を指摘してください。
+4. 最後に、これらを覚え直すための短い確認問題を5問、答え付きで出してください。
+
+説明は、専門用語をかみくだいて、具体例を交えてお願いします。`;
+}
+
+function copyText(text) {
+  const ta = $("promptOut");
+  ta.value = text;
+  ta.select();
+  ta.setSelectionRange(0, 999999);
+  let done = false;
+  try { done = document.execCommand("copy"); } catch {}
+  if (!done && navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => flashCopied()).catch(() => {});
+    return;
+  }
+  if (done) flashCopied();
+}
+function flashCopied() {
+  const m = $("copiedMsg");
+  m.classList.remove("hidden");
+  setTimeout(() => m.classList.add("hidden"), 1800);
+}
+
+/* ---------------------------- 配線 ---------------------------- */
+function setView(v) {
+  const quiz = v === "quiz";
+  $("quizView").classList.toggle("hidden", !quiz);
+  $("statsView").classList.toggle("hidden", quiz);
+  $("vQuiz").setAttribute("aria-pressed", quiz);
+  $("vStats").setAttribute("aria-pressed", !quiz);
+  if (!quiz) { $("actionBar").classList.add("hidden"); renderStats(); }
+  else if (answered) $("actionBar").classList.remove("hidden");
+  window.scrollTo({ top: 0, behavior: "instant" });
+}
+$("vQuiz").onclick = () => setView("quiz");
+$("vStats").onclick = () => setView("stats");
+$("toStatsBtn").onclick = () => setView("stats");
+$("nextBtn").onclick = nextQuestion;
+$("againBtn").onclick = () => { mode = "all"; buildQueue(); };
+$("allModeBtn").onclick = () => { mode = "all"; buildQueue(); };
+$("blankModeBtn").onclick = () => {
+  if (!blankCount(deck())) { alert("この科目には、プリントの空欄から作った問題がまだありません。"); return; }
+  mode = "blank";
+  buildQueue();
+  setView("quiz");
+};
+$("fixBtn").onclick = () => startFix();
+$("fixModeBtn").onclick = () => startFix();
+function startFix() {
+  const d = deck();
+  const left = d.cards.filter((_,i) => st(d.id, i).pending).length;
+  if (!left) { alert("この科目に、間違えたままの問題はありません。"); return; }
+  mode = "fix";
+  buildQueue();
+  setView("quiz");
+}
+$("resetBtn").onclick = () => {
+  if (!confirm(`${deck().name} の記録を消す。よろしい？`)) return;
+  delete stats[deck().id];
+  save();
+  mode = "all";
+  buildQueue();
+  renderTabs();
+};
+$("genBtn").onclick = () => copyText(buildPrompt(false));
+$("genAllBtn").onclick = () => copyText(buildPrompt(true));
+$("copyBtn").onclick = () => { if ($("promptOut").value) copyText($("promptOut").value); };
+
+document.addEventListener("keydown", e => {
+  if ($("statsView").classList.contains("hidden") === false) return;
+  if (["1","2","3","4"].includes(e.key) && !answered) {
+    const b = $("choices").children[+e.key - 1];
+    if (b) b.click();
+  }
+  if ((e.key === "Enter" || e.key === " ") && answered) { e.preventDefault(); nextQuestion(); }
+});
+
+renderTabs();
+buildQueue();
+</script>
+
+</body>
+</html>
