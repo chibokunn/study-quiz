@@ -1003,7 +1003,6 @@ let qi = 0;
 let choices = [];
 let answered = false;
 let sess = { ok:0, ng:0 };
-let autoTimer = null;
 
 function load() { try { return JSON.parse(localStorage.getItem(STORE)) || {}; } catch { return {}; } }
 function save() { try { localStorage.setItem(STORE, JSON.stringify(stats)); } catch {} }
@@ -1099,7 +1098,6 @@ function buildQueue() {
 }
 
 function showQuestion() {
-  clearTimeout(autoTimer);
   answered = false;
   $("actionBar").classList.add("hidden");
   const d = deck();
@@ -1183,13 +1181,10 @@ function answer(n) {
   if (c.note) { $("noteBox").textContent = c.note; $("noteBox").classList.remove("hidden"); }
   $("after").classList.remove("hidden");
   $("actionBar").classList.remove("hidden");
-
-  // 正解なら少し見せて自動で次へ。間違えたときは止まって読ませる
-  if (correct) autoTimer = setTimeout(nextQuestion, 1000);
+  // 正解でも自動では進めない。解説を読んでから自分で「次へ」
 }
 
 function nextQuestion() {
-  clearTimeout(autoTimer);
   qi++;
   showQuestion();
   saveSession();
