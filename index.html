@@ -360,16 +360,17 @@
       <p class="hint" id="doneHint"></p>
       <div class="donebtns">
         <button class="btn" id="fixBtn">まちがいだけやり直す</button>
-        <button class="btn-quiet" id="againBtn">もう一周</button>
+        <button class="btn-quiet" id="againBtn">最初からやる</button>
         <button class="btn-quiet" id="toStatsBtn">分析を見る</button>
       </div>
     </section>
 
     <div class="toolbar">
       <div class="group">
-        <button class="btn-quiet" id="blankModeBtn">空欄だけ</button>
+        <button class="btn-quiet hidden" id="blankModeBtn">空欄だけ</button>
+        <button class="btn-quiet" id="restModeBtn">残りをやる</button>
         <button class="btn-quiet" id="fixModeBtn">まちがい直し</button>
-        <button class="btn-quiet" id="allModeBtn">全部から出題</button>
+        <button class="btn-quiet" id="allModeBtn">最初からやる</button>
       </div>
       <div class="group">
         <button class="btn-quiet" id="resetBtn">この科目の記録を消す</button>
@@ -1071,11 +1072,18 @@ function makeChoices(i) {
 }
 
 /* ---------------------------- 出題 ---------------------------- */
+// 一度正解して、いま間違えたままでもない問題＝もう出さなくていい問題
+function cleared(dId, i) {
+  const s = st(dId, i);
+  return s.ok > 0 && !s.pending;
+}
+
 function buildQueue() {
   const d = deck();
   let idxs = d.cards.map((_,i) => i);
   if (mode === "fix")   idxs = idxs.filter(i => st(d.id, i).pending);
-  if (mode === "blank") idxs = idxs.filter(i => pri(d.cards[i]) === 1);
+  if (mode === "rest")  idxs = idxs.filter(i => !cleared(d.id, i));
+  if (mode === "blank") idxs = idxs.filter(i => pri(d.cards[i]) === 1 && !cleared(d.id, i));
   // 空欄（試験に出ると分かっている箇所）を先に、その中で苦手なものから
   idxs.sort((a,b) => {
     const A = st(d.id,a), B = st(d.id,b);
@@ -1096,10 +1104,14 @@ function showQuestion() {
   $("actionBar").classList.add("hidden");
   const d = deck();
   const dirLabel = d.dir === "term" ? "説明→用語" : "用語→意味";
-  $("modeLabel").textContent = mode === "fix" ? "まちがい直し" : mode === "blank" ? "空欄だけ" : dirLabel;
+  $("modeLabel").textContent =
+    mode === "fix"   ? "まちがい直し" :
+    mode === "blank" ? "空欄の残り"   :
+    mode === "rest"  ? "残りだけ"     : dirLabel;
   $("modeLabel").classList.toggle("fix", mode === "fix");
   $("counter").textContent = `${Math.min(qi+1, queue.length)} / ${queue.length}`;
   $("barFill").style.width = queue.length ? (qi / queue.length * 100) + "%" : "0%";
+  syncToolbar();
 
   if (qi >= queue.length) return showDone();
 
@@ -1191,8 +1203,14 @@ function showDone() {
   const pct = total ? Math.round(sess.ok / total * 100) : 0;
   $("doneTitle").textContent = mode === "fix" ? "まちがい直し、ここまで。" : `${deck().name}　一周した。`;
   $("doneScore").innerHTML = total ? `${pct}<small>％　${sess.ok}/${total}問</small>` : "—";
-  const left = deck().cards.filter((_,i) => st(deck().id, i).pending).length;
-  $("doneHint").textContent = left ? `まだ ${left} 問が「間違えたまま」になっている。` : "取りこぼしはゼロ。";
+  const d = deck();
+  const left   = d.cards.filter((_,i) => st(d.id, i).pending).length;
+  const notYet = d.cards.filter((_,i) => st(d.id, i).seen === 0).length;
+  $("doneHint").textContent =
+    left && notYet ? `間違えたままが ${left} 問、まだ手をつけていないのが ${notYet} 問。`
+    : left         ? `間違えたままが ${left} 問。これを消せばこの科目は完了。`
+    : notYet       ? `まだ手をつけていないのが ${notYet} 問。「残りをやる」で続けられる。`
+    :                "この科目は全問正解済み。";
   $("fixBtn").classList.toggle("hidden", left === 0);
   renderTabs();
 }
@@ -1217,6 +1235,20 @@ function renderTabs() {
   const memo = deck().memo;
   $("deckMemo").textContent = memo || "";
   $("deckMemo").classList.toggle("hidden", !memo);
+  syncToolbar();
+}
+
+// 科目によって使うボタンが違う。社会系2科目に空欄はないので出さない。
+// あわせて、押す前に「何問残っているか」が見えるように数を添える
+function syncToolbar() {
+  const d = deck();
+  const nb = d.cards.filter((c,i) => pri(c) === 1 && !cleared(d.id, i)).length;
+  const nr = d.cards.filter((_,i) => !cleared(d.id, i)).length;
+  const nf = d.cards.filter((_,i) => st(d.id, i).pending).length;
+  $("blankModeBtn").classList.toggle("hidden", blankCount(d) === 0);
+  $("blankModeBtn").textContent = "空欄だけ" + (nb ? " " + nb : "");
+  $("restModeBtn").textContent  = "残りをやる" + (nr ? " " + nr : "");
+  $("fixModeBtn").textContent   = "まちがい直し" + (nf ? " " + nf : "");
 }
 
 /* ---------------------------- 分析 ---------------------------- */
@@ -1402,14 +1434,23 @@ $("vQuiz").onclick = () => setView("quiz");
 $("vStats").onclick = () => setView("stats");
 $("toStatsBtn").onclick = () => setView("stats");
 $("nextBtn").onclick = nextQuestion;
-$("againBtn").onclick = () => { mode = "all"; buildQueue(); };
-$("allModeBtn").onclick = () => { mode = "all"; buildQueue(); };
-$("blankModeBtn").onclick = () => {
-  if (!blankCount(deck())) { alert("この科目には、プリントの空欄から作った問題がまだありません。"); return; }
-  mode = "blank";
+$("againBtn").onclick = () => { mode = "all"; buildQueue(); setView("quiz"); };
+$("allModeBtn").onclick = () => { mode = "all"; buildQueue(); setView("quiz"); };
+
+// 残り／空欄の残り。該当が0なら切り替えず、何が起きたか伝える
+function startMode(m, emptyMsg) {
+  const d = deck();
+  const n = d.cards.filter((c,i) =>
+    !cleared(d.id, i) && (m === "blank" ? pri(c) === 1 : true)).length;
+  if (!n) { alert(emptyMsg); return; }
+  mode = m;
   buildQueue();
   setView("quiz");
-};
+}
+$("restModeBtn").onclick  = () => startMode("rest",
+  `${deck().name} は全問正解済み。「最初からやる」で頭から回せる。`);
+$("blankModeBtn").onclick = () => startMode("blank",
+  "空欄の問題は全部正解済み。「残りをやる」で周辺の用語に進める。");
 $("fixBtn").onclick = () => startFix();
 $("fixModeBtn").onclick = () => startFix();
 function startFix() {
