@@ -1006,6 +1006,46 @@ let autoTimer = null;
 
 function load() { try { return JSON.parse(localStorage.getItem(STORE)) || {}; } catch { return {}; } }
 function save() { try { localStorage.setItem(STORE, JSON.stringify(stats)); } catch {} }
+
+/* ------------------- 解いている途中の状態を覚えておく -------------------
+   「12 / 152」の位置と出題順を科目ごとに保存する。タブを閉じても、科目を
+   行き来しても、続きから再開できる。保存先は localStorage なので、記録は
+   その端末のそのブラウザだけのもの。同じURLを別の人が開いても混ざらない。
+   ---------------------------------------------------------------------- */
+const SESS_STORE = "test-taisaku-sess-v1";
+let sessions = loadSessions();
+
+function loadSessions() {
+  try {
+    const s = JSON.parse(localStorage.getItem(SESS_STORE));
+    if (s && typeof s === "object") return { lastDeck: s.lastDeck || null, byDeck: s.byDeck || {} };
+  } catch {}
+  return { lastDeck: null, byDeck: {} };
+}
+function saveSession() {
+  const d = deck();
+  sessions.lastDeck = d.id;
+  sessions.byDeck[d.id] = { mode, queue, qi, ok: sess.ok, ng: sess.ng, n: d.cards.length };
+  try { localStorage.setItem(SESS_STORE, JSON.stringify(sessions)); } catch {}
+}
+// 保存済みの続きが今のカードデータと噛み合うか。問題を追加・修正すると番号がずれるので、
+// 総数が変わっていたら作り直す
+function usableSession(s, d) {
+  return s && s.n === d.cards.length
+    && Array.isArray(s.queue) && s.queue.length
+    && s.queue.every(i => Number.isInteger(i) && i >= 0 && i < d.cards.length)
+    && Number.isInteger(s.qi) && s.qi >= 0 && s.qi <= s.queue.length;
+}
+function resumeOrBuild() {
+  const d = deck(), s = sessions.byDeck[d.id];
+  if (!usableSession(s, d)) return buildQueue();
+  mode  = s.mode || "all";
+  queue = s.queue;
+  qi    = s.qi;
+  sess  = { ok: s.ok || 0, ng: s.ng || 0 };
+  showQuestion();
+  saveSession();
+}
 const deck = () => DECKS[deckIdx];
 function st(dId, i) {
   stats[dId] = stats[dId] || {};
@@ -1047,6 +1087,7 @@ function buildQueue() {
   qi = 0;
   sess = { ok:0, ng:0 };
   showQuestion();
+  saveSession();
 }
 
 function showQuestion() {
@@ -1107,6 +1148,7 @@ function answer(n) {
     s.picks[picked] = (s.picks[picked] || 0) + 1;
   }
   save();
+  saveSession();
 
   const btns = [...$("choices").children];
   btns.forEach((b, k) => {
@@ -1138,6 +1180,7 @@ function nextQuestion() {
   clearTimeout(autoTimer);
   qi++;
   showQuestion();
+  saveSession();
 }
 
 function showDone() {
@@ -1166,7 +1209,8 @@ function renderTabs() {
     b.setAttribute("aria-selected", n === deckIdx);
     const nb = blankCount(d);
     b.innerHTML = `${esc(d.name)}<span class="cnt">${bad ? "×" + bad : nb ? "空欄" + nb : d.cards.length + "問"}</span>`;
-    b.onclick = () => { deckIdx = n; mode = "all"; buildQueue(); renderTabs(); if (!$("statsView").classList.contains("hidden")) renderStats(); };
+    // 科目を移ってもその科目の続きから。初めての科目なら新しく組む
+    b.onclick = () => { deckIdx = n; resumeOrBuild(); renderTabs(); if (!$("statsView").classList.contains("hidden")) renderStats(); };
     box.appendChild(b);
   });
   $("deckTitle").textContent = deck().name;
@@ -1380,6 +1424,7 @@ $("resetBtn").onclick = () => {
   if (!confirm(`${deck().name} の記録を消す。よろしい？`)) return;
   delete stats[deck().id];
   save();
+  delete sessions.byDeck[deck().id];   // 解いた位置も一緒に消す
   mode = "all";
   buildQueue();
   renderTabs();
@@ -1397,8 +1442,11 @@ document.addEventListener("keydown", e => {
   if ((e.key === "Enter" || e.key === " ") && answered) { e.preventDefault(); nextQuestion(); }
 });
 
+// 前回開いていた科目を思い出して、その続きから始める
+const lastIdx = DECKS.findIndex(d => d.id === sessions.lastDeck);
+if (lastIdx >= 0) deckIdx = lastIdx;
 renderTabs();
-buildQueue();
+resumeOrBuild();
 </script>
 
 </body>
