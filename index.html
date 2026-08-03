@@ -305,6 +305,43 @@
     border:1px solid var(--accent-dim); border-radius:999px; padding:.3rem .8rem;
   }
 
+  /* 組み立てエリア（選んだ順に積まれる） */
+  .build {
+    display:flex; flex-direction:column; gap:.45rem;
+    min-height:3.4rem; padding:.55rem;
+    border:1.5px dashed var(--edge); border-radius:9px; background:var(--surface2);
+  }
+  .build.filled { border-style:solid; border-color:var(--accent); }
+  .build .placeholder { font-size:.82rem; color:var(--ink-faint); text-align:center; padding:.55rem 0; }
+
+  .pool { display:flex; flex-direction:column; gap:.45rem; }
+  .poollabel { font-size:.72rem; letter-spacing:.1em; color:var(--ink-faint); }
+
+  .blk {
+    display:flex; gap:.65rem; align-items:flex-start; width:100%; text-align:left;
+    font-family:inherit; font-size:.95rem; line-height:1.7;
+    border:1.5px solid var(--edge); background:var(--surface); color:var(--ink);
+    border-radius:8px; padding:.65rem .75rem; cursor:pointer;
+    touch-action:manipulation; transition:transform .08s, border-color .12s, background .12s;
+  }
+  .blk:active { transform:scale(.985); }
+  .blk .slot {
+    flex:0 0 auto; font-family:var(--font-num); font-size:.72rem; font-weight:700;
+    width:1.5rem; height:1.5rem; border-radius:5px; margin-top:.1rem;
+    display:flex; align-items:center; justify-content:center;
+    border:1.5px solid var(--accent); color:var(--accent);
+  }
+  .blk.inpool .slot { border-color:var(--edge); color:var(--ink-faint); }
+  .blk.ok  { border-color:var(--ok); background:var(--ok-dim); }
+  .blk.ok .slot  { border-color:var(--ok); color:var(--ok); }
+  .blk.bad { border-color:var(--ng); background:var(--ng-dim); }
+  .blk.bad .slot { border-color:var(--ng); color:var(--ng); }
+  .blk:disabled { cursor:default; }
+
+  .verdict-line { font-size:.95rem; font-weight:700; display:flex; align-items:center; gap:.5rem; }
+  .verdict-line.hit  { color:var(--ok); }
+  .verdict-line.miss { color:var(--ng); }
+
   .points { display:flex; flex-direction:column; gap:.55rem; }
   .point {
     display:flex; gap:.7rem; align-items:flex-start;
@@ -422,18 +459,28 @@
 
       <p class="askline" id="exAsk"></p>
 
+      <!-- 並べ替え式：下のブロックを正しい順にタップして説明を組み立てる -->
+      <div id="exSort" class="hidden" style="display:flex;flex-direction:column;gap:.7rem">
+        <div class="build" id="exBuild"></div>
+        <div class="poollabel">↓ 使うもの（タップで上へ／上のをタップで戻す）</div>
+        <div class="pool" id="exPool"></div>
+      </div>
+
       <div class="keychips hidden" id="exKeys"></div>
 
       <div class="group" style="display:flex;gap:.5rem;flex-wrap:wrap" id="exBefore">
-        <button class="btn" id="exRevealBtn">答えを見る</button>
-        <button class="btn-quiet" id="exKeyBtn">キーワードだけ見る</button>
+        <button class="btn hidden" id="exCheckBtn">答え合わせ</button>
+        <button class="btn hidden" id="exRevealBtn">答えを見る</button>
+        <button class="btn-quiet hidden" id="exKeyBtn">キーワードだけ見る</button>
+        <button class="btn-quiet hidden" id="exGiveupBtn">わからない</button>
       </div>
 
       <div class="hidden" id="exAfter" style="display:flex;flex-direction:column;gap:.8rem">
+        <div class="verdict-line hidden" id="exVerdict"></div>
         <div class="points" id="exPoints"></div>
         <div class="modelans" id="exModel"></div>
         <div class="note hidden" id="exNote"></div>
-        <div class="grade">
+        <div class="grade hidden" id="exGrade">
           <button data-g="1">言えなかった<small>すぐ再出題</small></button>
           <button data-g="2">半分くらい<small>あとで再出題</small></button>
           <button data-g="3">言えた<small>覚えた側へ</small></button>
@@ -1196,9 +1243,16 @@ function keyOf(p) {
   return head + "…";
 }
 
+let exPts = [];      // 正しい順のブロック
+let exOrder = [];     // 画面に出す順（シャッフル済みの元index）
+let exPicked = [];    // 選んだ順（元indexの配列）
+let exSortable = false;
+
 function showExplain() {
   const d = deck(), i = queue[qi], c = d.cards[i];
-  const pts = splitPoints(explainText(c));
+  exPts = splitPoints(explainText(c));
+  exPicked = [];
+  exSortable = exPts.length >= 2;
 
   $("stage").classList.add("hidden");
   $("doneBox").classList.add("hidden");
@@ -1208,6 +1262,8 @@ function showExplain() {
   $("exBefore").classList.remove("hidden");
   $("exKeys").classList.add("hidden");
   $("exNote").classList.add("hidden");
+  $("exVerdict").classList.add("hidden");
+  $("exGrade").classList.add("hidden");
 
   $("explainStage").classList.toggle("flagged", !!c.warn);
   $("explainStage").classList.toggle("blank", pri(c) === 1);
@@ -1215,13 +1271,104 @@ function showExplain() {
   $("exBlank").classList.toggle("hidden", pri(c) !== 1);
   $("exSrc").textContent = (c.src || "") + (c.sub ? "　" + c.sub : "");
   $("exTerm").textContent = c.t;
-  $("exAsk").innerHTML = `言うべきことは<span class="dots">${pts.map(() => "<i></i>").join("")}</span><b>${pts.length}つ</b>。声に出すか、頭の中で組み立ててから答えを見る。`;
 
-  $("exKeys").innerHTML = pts.map(p => `<span class="keychip">${esc(keyOf(p))}</span>`).join("");
-  $("exPoints").innerHTML = pts.map((p, n) =>
+  // ブロックが2つ以上あるときは並べ替え、1つしかないときは自己採点式
+  $("exSort").classList.toggle("hidden", !exSortable);
+  $("exCheckBtn").classList.toggle("hidden", !exSortable);
+  $("exGiveupBtn").classList.toggle("hidden", !exSortable);
+  $("exRevealBtn").classList.toggle("hidden", exSortable);
+  $("exKeyBtn").classList.toggle("hidden", exSortable);
+
+  $("exAsk").innerHTML = exSortable
+    ? `言うべきことは<span class="dots">${exPts.map(() => "<i></i>").join("")}</span><b>${exPts.length}つ</b>。正しい順に並べて説明を組み立てる。`
+    : `言うべきことは<b>1つ</b>。声に出すか、頭の中で組み立ててから答えを見る。`;
+
+  exOrder = shuffle(exPts.map((_, n) => n));
+  renderSort();
+
+  $("exKeys").innerHTML = exPts.map(p => `<span class="keychip">${esc(keyOf(p))}</span>`).join("");
+  $("exPoints").innerHTML = exPts.map((p, n) =>
     `<div class="point"><span class="n">${n+1}</span><span>${esc(p)}</span></div>`).join("");
   $("exModel").innerHTML = `<b>まとめて言うと</b>　${esc(explainText(c))}`;
   if (c.note) { $("exNote").textContent = c.note; $("exNote").classList.remove("hidden"); }
+}
+
+// 組み立てエリアと選択肢を描き直す
+function renderSort() {
+  if (!exSortable) return;
+  const build = $("exBuild"), pool = $("exPool");
+
+  build.innerHTML = exPicked.length
+    ? exPicked.map((n, k) =>
+        `<button class="blk" data-pick="${k}"><span class="slot">${k+1}</span><span>${esc(exPts[n])}</span></button>`).join("")
+    : `<div class="placeholder">ここに組み立てる</div>`;
+  build.classList.toggle("filled", exPicked.length > 0);
+
+  const rest = exOrder.filter(n => !exPicked.includes(n));
+  pool.innerHTML = rest.map(n =>
+    `<button class="blk inpool" data-pool="${n}"><span class="slot">＋</span><span>${esc(exPts[n])}</span></button>`).join("");
+
+  build.querySelectorAll("[data-pick]").forEach(b => {
+    b.onclick = () => { if (!answered) { exPicked.splice(+b.dataset.pick, 1); renderSort(); } };
+  });
+  pool.querySelectorAll("[data-pool]").forEach(b => {
+    b.onclick = () => { if (!answered) { exPicked.push(+b.dataset.pool); renderSort(); } };
+  });
+
+  $("exCheckBtn").disabled = exPicked.length !== exPts.length;
+  $("exCheckBtn").style.opacity = exPicked.length === exPts.length ? "1" : ".45";
+}
+
+// 並べた順が合っているか判定する
+function checkExplain() {
+  if (answered || exPicked.length !== exPts.length) return;
+  answered = true;
+  const correct = exPicked.every((n, k) => n === k);
+
+  $("exBuild").querySelectorAll("[data-pick]").forEach((b, k) => {
+    b.disabled = true;
+    b.classList.add(exPicked[k] === k ? "ok" : "bad");
+  });
+  $("exPool").querySelectorAll("[data-pool]").forEach(b => b.disabled = true);
+
+  const v = $("exVerdict");
+  v.className = "verdict-line " + (correct ? "hit" : "miss");
+  v.textContent = correct ? "その順番で合っている" : "順番が違う。正しい並びはこちら";
+  v.classList.remove("hidden");
+
+  const d = deck(), i = queue[qi], s = st(d.id, i);
+  s.seen++;
+  if (correct) { s.ok++; s.pending = false; sess.ok++; }
+  else { s.wrong++; s.pending = true; sess.ng++; queue.splice(Math.min(qi + 5, queue.length), 0, i); }
+  save();
+  saveSession();
+
+  $("exBefore").classList.add("hidden");
+  $("exAfter").classList.remove("hidden");
+  $("actionBar").classList.remove("hidden");
+  syncToolbar();
+}
+
+// 並べ替えを諦めたとき。答えを見せて、間違い扱いで戻ってくるようにする
+function giveUpExplain() {
+  if (answered) return;
+  answered = true;
+  const d = deck(), i = queue[qi], s = st(d.id, i);
+  s.seen++; s.wrong++; s.pending = true; sess.ng++;
+  queue.splice(Math.min(qi + 4, queue.length), 0, i);
+  save();
+  saveSession();
+
+  $("exBuild").querySelectorAll("button").forEach(b => b.disabled = true);
+  $("exPool").querySelectorAll("button").forEach(b => b.disabled = true);
+  const v = $("exVerdict");
+  v.className = "verdict-line miss";
+  v.textContent = "正しい並びはこちら";
+  v.classList.remove("hidden");
+  $("exBefore").classList.add("hidden");
+  $("exAfter").classList.remove("hidden");
+  $("actionBar").classList.remove("hidden");
+  syncToolbar();
 }
 
 function revealExplain() {
@@ -1229,6 +1376,7 @@ function revealExplain() {
   answered = true;
   $("exBefore").classList.add("hidden");
   $("exAfter").classList.remove("hidden");
+  $("exGrade").classList.remove("hidden");
 }
 
 function gradeExplain(g) {
@@ -1424,7 +1572,7 @@ function syncToolbar() {
   const ne = d.cards.filter((c,i) => canExplain(c) && !cleared(d.id, i)).length;
   $("explainModeBtn").textContent = "説明モード" + (ne ? " " + ne : "");
   $("keyHint").innerHTML = mode === "explain"
-    ? "<kbd>Enter</kbd> で答えを見る　<kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> で自己採点"
+    ? "<kbd>1</kbd><kbd>2</kbd><kbd>3</kbd>… で下から選ぶ　<kbd>Backspace</kbd> で戻す　<kbd>Enter</kbd> で答え合わせ"
     : "<kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> で選択　<kbd>Enter</kbd> で次へ";
   $("blankModeBtn").classList.toggle("hidden", blankCount(d) === 0);
   $("blankModeBtn").textContent = "空欄だけ" + (nb ? " " + nb : "");
@@ -1629,6 +1777,8 @@ function startMode(m, emptyMsg) {
   setView("quiz");
 }
 $("exRevealBtn").onclick = revealExplain;
+$("exCheckBtn").onclick = checkExplain;
+$("exGiveupBtn").onclick = giveUpExplain;
 $("exKeyBtn").onclick = () => $("exKeys").classList.toggle("hidden");
 document.querySelectorAll("#exAfter .grade button").forEach(b => {
   b.onclick = () => gradeExplain(Number(b.dataset.g));
@@ -1666,8 +1816,19 @@ document.addEventListener("keydown", e => {
   if ($("statsView").classList.contains("hidden") === false) return;
 
   if (mode === "explain") {
-    if ((e.key === "Enter" || e.key === " ") && !answered) { e.preventDefault(); revealExplain(); }
-    else if (["1","2","3"].includes(e.key) && answered) gradeExplain(+e.key);
+    if (answered) {
+      if (exSortable) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); nextQuestion(); } }
+      else if (["1","2","3"].includes(e.key)) gradeExplain(+e.key);
+      return;
+    }
+    if (exSortable) {
+      if (["1","2","3","4","5","6"].includes(e.key)) {
+        const b = $("exPool").children[+e.key - 1];
+        if (b) b.click();
+      }
+      if (e.key === "Enter") { e.preventDefault(); checkExplain(); }
+      if (e.key === "Backspace" && exPicked.length) { e.preventDefault(); exPicked.pop(); renderSort(); }
+    } else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); revealExplain(); }
     return;
   }
   if (["1","2","3","4"].includes(e.key) && !answered) {
