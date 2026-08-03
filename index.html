@@ -1363,8 +1363,8 @@ function checkExplain() {
 
   const d = deck(), i = queue[qi], s = st(d.id, i);
   s.seen++;
-  if (correct) { s.ok++; s.pending = false; sess.ok++; }
-  else { s.wrong++; s.pending = true; sess.ng++; queue.splice(Math.min(qi + 5, queue.length), 0, i); }
+  if (correct) { s.ok++; s.pending = false; s.c = true; sess.ok++; }
+  else { s.wrong++; s.pending = true; s.c = false; sess.ng++; queue.splice(Math.min(qi + 5, queue.length), 0, i); }
   save();
   saveSession();
 
@@ -1393,7 +1393,7 @@ function giveUpExplain() {
   if (answered) return;
   answered = true;
   const d = deck(), i = queue[qi], s = st(d.id, i);
-  s.seen++; s.wrong++; s.pending = true; sess.ng++;
+  s.seen++; s.wrong++; s.pending = true; s.c = false; sess.ng++;
   queue.splice(Math.min(qi + 4, queue.length), 0, i);
   save();
   saveSession();
@@ -1421,9 +1421,9 @@ function gradeExplain(g) {
   if (!answered) return;
   const d = deck(), i = queue[qi], s = st(d.id, i);
   s.seen++;
-  if (g === 3)      { s.ok++;  s.pending = false; sess.ok++; }
-  else if (g === 2) { s.wrong++; s.pending = true; sess.ng++; }
-  else              { s.wrong++; s.pending = true; sess.ng++; }
+  if (g === 3)      { s.ok++;  s.pending = false; s.c = true;  sess.ok++; }
+  else if (g === 2) { s.wrong++; s.pending = true; s.c = false; sess.ng++; }
+  else              { s.wrong++; s.pending = true; s.c = false; sess.ng++; }
   save();
   // 半端だったものは同じ回のうちにもう一度戻す
   if (g === 1)      queue.splice(Math.min(qi + 4, queue.length), 0, i);
@@ -1433,10 +1433,13 @@ function gradeExplain(g) {
 }
 
 /* ---------------------------- 出題 ---------------------------- */
-// 一度正解して、いま間違えたままでもない問題＝もう出さなくていい問題
+// この周でもう出さなくていい問題。正解すると立ち、まちがえると落ちる。
+// 「最初からやる」を押すとこの印だけ全部落ちるので、まちがえた回数や
+// 取り違えの記録（分析タブとClaude用の文の元）は残したまま、出題だけ全問に戻る
 function cleared(dId, i) {
   const s = st(dId, i);
-  return s.ok > 0 && !s.pending;
+  if (typeof s.c !== "boolean") s.c = s.ok > 0 && !s.pending;   // 旧データの引き継ぎ
+  return s.c;
 }
 
 function buildQueue() {
@@ -1518,9 +1521,9 @@ function answer(n) {
   const d = deck(), i = queue[qi], picked = choices[n], correct = picked === i;
   const s = st(d.id, i);
   s.seen++;
-  if (correct) { s.ok++; s.pending = false; sess.ok++; }
+  if (correct) { s.ok++; s.pending = false; s.c = true; sess.ok++; }
   else {
-    s.wrong++; s.pending = true; sess.ng++;
+    s.wrong++; s.pending = true; s.c = false; sess.ng++;
     s.picks[picked] = (s.picks[picked] || 0) + 1;
   }
   save();
@@ -1801,8 +1804,20 @@ $("vQuiz").onclick = () => setView("quiz");
 $("vStats").onclick = () => setView("stats");
 $("toStatsBtn").onclick = () => setView("stats");
 $("nextBtn").onclick = nextQuestion;
-$("againBtn").onclick = () => { mode = "all"; buildQueue(); setView("quiz"); };
-$("allModeBtn").onclick = () => { mode = "all"; buildQueue(); setView("quiz"); };
+// 「最初からやる」＝正解済みの印を全部落として、出題を全問に戻す。
+// 「空欄だけ」「残りをやる」の残り数もこれで満数に戻る。
+// まちがえた回数・取り違えの記録は消さない（分析タブはそのまま使える）
+function restartDeck() {
+  const d = deck();
+  d.cards.forEach((_, i) => { st(d.id, i).c = false; });
+  save();
+  mode = "all";
+  buildQueue();
+  renderTabs();
+  setView("quiz");
+}
+$("againBtn").onclick = restartDeck;
+$("allModeBtn").onclick = restartDeck;
 
 // 残り／空欄の残り。該当が0なら切り替えず、何が起きたか伝える
 function startMode(m, emptyMsg) {
