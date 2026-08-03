@@ -292,6 +292,57 @@
 
   .hidden { display:none !important; }
 
+  /* --------------------- 説明モード（記述式の練習） --------------------- */
+  .askline { font-size:.95rem; color:var(--ink-soft); line-height:1.8; }
+  .askline b { color:var(--ink); }
+  .dots { display:inline-flex; gap:.28rem; vertical-align:middle; margin:0 .4rem; }
+  .dots i { width:.62rem; height:.62rem; border-radius:50%; background:var(--accent); display:block; }
+
+  .keychips { display:flex; flex-wrap:wrap; gap:.45rem; }
+  .keychip {
+    font-family:var(--font-term); font-size:.95rem; font-weight:600;
+    color:var(--accent); background:var(--accent-dim);
+    border:1px solid var(--accent-dim); border-radius:999px; padding:.3rem .8rem;
+  }
+
+  .points { display:flex; flex-direction:column; gap:.55rem; }
+  .point {
+    display:flex; gap:.7rem; align-items:flex-start;
+    background:var(--surface2); border:1px solid var(--edge);
+    border-left:3px solid var(--ok); border-radius:7px; padding:.7rem .85rem;
+    font-size:.97rem; line-height:1.75;
+  }
+  .point .n {
+    flex:0 0 auto; font-family:var(--font-num); font-size:.72rem; font-weight:700;
+    color:var(--ok); border:1.5px solid var(--ok); border-radius:5px;
+    width:1.55rem; height:1.55rem; display:flex; align-items:center; justify-content:center;
+    margin-top:.15rem;
+  }
+  .modelans {
+    font-size:.88rem; line-height:1.9; color:var(--ink-soft);
+    border-top:1px dashed var(--edge); padding-top:.75rem;
+  }
+  .modelans b { color:var(--ink); font-family:var(--font-term); }
+
+  .grade { display:grid; grid-template-columns:repeat(3,1fr); gap:.55rem; }
+  .grade button {
+    font-family:inherit; border:1.5px solid var(--edge); background:var(--surface);
+    color:var(--ink); padding:.75rem .4rem .65rem; border-radius:8px; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:.1rem;
+    font-size:.92rem; font-weight:700; min-height:var(--tap);
+    touch-action:manipulation; transition:transform .08s, border-color .12s, color .12s;
+  }
+  .grade button small { font-size:.66rem; font-weight:400; color:var(--ink-faint); }
+  .grade button:active { transform:scale(.985); }
+  .grade button[data-g="3"]:active { border-color:var(--ok); color:var(--ok); }
+  .grade button[data-g="2"]:active { border-color:var(--marker); color:var(--marker); }
+  .grade button[data-g="1"]:active { border-color:var(--ng); color:var(--ng); }
+  @media (hover: hover) {
+    .grade button[data-g="3"]:hover { border-color:var(--ok); color:var(--ok); }
+    .grade button[data-g="2"]:hover { border-color:var(--marker); color:var(--marker); }
+    .grade button[data-g="1"]:hover { border-color:var(--ng); color:var(--ng); }
+  }
+
   /* ------------------------------ 画面が狭いとき ------------------------------ */
   @media (max-width: 30rem) {
     body { font-size:16px; }
@@ -303,6 +354,9 @@
     .choice { font-size:.97rem; padding:.8rem .75rem; gap:.65rem; }
     .choice .body.t { font-size:1.1rem; }
     .card { padding:1rem .85rem 1.1rem; }
+    .grade button { font-size:.85rem; padding:.7rem .2rem .6rem; }
+    .grade button small { font-size:.6rem; }
+    .point { font-size:.93rem; padding:.65rem .7rem; }
     .toolbar { justify-content:stretch; }
     .toolbar .group { flex:1 1 100%; }
     .toolbar .group .btn-quiet { flex:1 1 auto; }
@@ -354,6 +408,39 @@
       </div>
     </section>
 
+    <!-- 説明モード：用語を見て、自分の言葉で説明を組み立てる -->
+    <section id="explainStage" class="card hidden">
+      <div class="card-head">
+        <span><span class="blankchip hidden" id="exBlank">空欄</span><span id="exSrc"></span></span>
+        <span class="flagchip hidden" id="exFlag">要確認</span>
+      </div>
+
+      <div>
+        <div class="plabel">この用語を説明しなさい</div>
+        <p class="term" id="exTerm"></p>
+      </div>
+
+      <p class="askline" id="exAsk"></p>
+
+      <div class="keychips hidden" id="exKeys"></div>
+
+      <div class="group" style="display:flex;gap:.5rem;flex-wrap:wrap" id="exBefore">
+        <button class="btn" id="exRevealBtn">答えを見る</button>
+        <button class="btn-quiet" id="exKeyBtn">キーワードだけ見る</button>
+      </div>
+
+      <div class="hidden" id="exAfter" style="display:flex;flex-direction:column;gap:.8rem">
+        <div class="points" id="exPoints"></div>
+        <div class="modelans" id="exModel"></div>
+        <div class="note hidden" id="exNote"></div>
+        <div class="grade">
+          <button data-g="1">言えなかった<small>すぐ再出題</small></button>
+          <button data-g="2">半分くらい<small>あとで再出題</small></button>
+          <button data-g="3">言えた<small>覚えた側へ</small></button>
+        </div>
+      </div>
+    </section>
+
     <section id="doneBox" class="done hidden">
       <h2 id="doneTitle"></h2>
       <div class="score" id="doneScore"></div>
@@ -367,6 +454,7 @@
 
     <div class="toolbar">
       <div class="group">
+        <button class="btn-quiet" id="explainModeBtn">説明モード</button>
         <button class="btn-quiet hidden" id="blankModeBtn">空欄だけ</button>
         <button class="btn-quiet" id="restModeBtn">残りをやる</button>
         <button class="btn-quiet" id="fixModeBtn">まちがい直し</button>
@@ -377,7 +465,7 @@
       </div>
     </div>
 
-    <p class="hint keys"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> で選択　<kbd>Enter</kbd> で次へ</p>
+    <p class="hint keys" id="keyHint"></p>
   </div>
 
   <!-- ============ 分析ビュー ============ -->
@@ -1070,6 +1158,94 @@ function makeChoices(i) {
   return shuffle([i, ...pool.slice(0, 3)]);
 }
 
+/* -------------------- 説明モード（記述式の練習） --------------------
+   「〇〇について説明しなさい」と出る試験のための練習。用語だけ見せて、
+   自分の言葉で説明を組み立ててから答え合わせする。書かせるのではなく、
+   模範解答を「言うべきポイント」に割って、どこまで言えたかを自分で採点する。
+   -------------------------------------------------------------------- */
+
+// 空欄カードは m が問題文（カッコ入りの本文）なので、説明用には def を使う
+function explainText(c) { return (pri(c) === 1 ? (c.def || "") : (c.m || "")).trim(); }
+function canExplain(c)  { return explainText(c).length >= 12; }
+
+// 説明文を「言うべきポイント」に割る。
+// 基本は句点で。日本語の定義文は読点で切ると「〜という」で途切れて意味をなさないので、
+// 読点まで踏み込むのは1文が50字を超える長文のときだけにする
+function splitPoints(t) {
+  const out = [];
+  (t || "").split(/(?<=。)/).map(s => s.trim()).filter(Boolean).forEach(s => {
+    if (s.length <= 50) { out.push(s); return; }
+    let buf = "";
+    s.split(/(?<=、)/).filter(p => p.trim()).forEach(p => {
+      if (!buf || buf.length + p.length <= 40) buf += p;
+      else { out.push(buf); buf = p; }
+    });
+    if (buf) out.push(buf);
+  });
+  const merged = [];
+  out.forEach(p => {
+    if (merged.length && p.length < 6) merged[merged.length - 1] += p;
+    else merged.push(p);
+  });
+  return merged.map(p => p.replace(/、$/, ""));
+}
+
+// ポイントの冒頭だけを見せるヒント
+function keyOf(p) {
+  const head = p.replace(/^(また|さらに|そして|ただし)、?/, "").slice(0, 6);
+  return head + "…";
+}
+
+function showExplain() {
+  const d = deck(), i = queue[qi], c = d.cards[i];
+  const pts = splitPoints(explainText(c));
+
+  $("stage").classList.add("hidden");
+  $("doneBox").classList.add("hidden");
+  $("actionBar").classList.add("hidden");
+  $("explainStage").classList.remove("hidden");
+  $("exAfter").classList.add("hidden");
+  $("exBefore").classList.remove("hidden");
+  $("exKeys").classList.add("hidden");
+  $("exNote").classList.add("hidden");
+
+  $("explainStage").classList.toggle("flagged", !!c.warn);
+  $("explainStage").classList.toggle("blank", pri(c) === 1);
+  $("exFlag").classList.toggle("hidden", !c.warn);
+  $("exBlank").classList.toggle("hidden", pri(c) !== 1);
+  $("exSrc").textContent = (c.src || "") + (c.sub ? "　" + c.sub : "");
+  $("exTerm").textContent = c.t;
+  $("exAsk").innerHTML = `言うべきことは<span class="dots">${pts.map(() => "<i></i>").join("")}</span><b>${pts.length}つ</b>。声に出すか、頭の中で組み立ててから答えを見る。`;
+
+  $("exKeys").innerHTML = pts.map(p => `<span class="keychip">${esc(keyOf(p))}</span>`).join("");
+  $("exPoints").innerHTML = pts.map((p, n) =>
+    `<div class="point"><span class="n">${n+1}</span><span>${esc(p)}</span></div>`).join("");
+  $("exModel").innerHTML = `<b>まとめて言うと</b>　${esc(explainText(c))}`;
+  if (c.note) { $("exNote").textContent = c.note; $("exNote").classList.remove("hidden"); }
+}
+
+function revealExplain() {
+  if (answered) return;
+  answered = true;
+  $("exBefore").classList.add("hidden");
+  $("exAfter").classList.remove("hidden");
+}
+
+function gradeExplain(g) {
+  if (!answered) return;
+  const d = deck(), i = queue[qi], s = st(d.id, i);
+  s.seen++;
+  if (g === 3)      { s.ok++;  s.pending = false; sess.ok++; }
+  else if (g === 2) { s.wrong++; s.pending = true; sess.ng++; }
+  else              { s.wrong++; s.pending = true; sess.ng++; }
+  save();
+  // 半端だったものは同じ回のうちにもう一度戻す
+  if (g === 1)      queue.splice(Math.min(qi + 4, queue.length), 0, i);
+  else if (g === 2) queue.splice(Math.min(qi + 9, queue.length), 0, i);
+  saveSession();
+  nextQuestion();
+}
+
 /* ---------------------------- 出題 ---------------------------- */
 // 一度正解して、いま間違えたままでもない問題＝もう出さなくていい問題
 function cleared(dId, i) {
@@ -1080,9 +1256,10 @@ function cleared(dId, i) {
 function buildQueue() {
   const d = deck();
   let idxs = d.cards.map((_,i) => i);
-  if (mode === "fix")   idxs = idxs.filter(i => st(d.id, i).pending);
-  if (mode === "rest")  idxs = idxs.filter(i => !cleared(d.id, i));
-  if (mode === "blank") idxs = idxs.filter(i => pri(d.cards[i]) === 1 && !cleared(d.id, i));
+  if (mode === "fix")     idxs = idxs.filter(i => st(d.id, i).pending);
+  if (mode === "rest")    idxs = idxs.filter(i => !cleared(d.id, i));
+  if (mode === "blank")   idxs = idxs.filter(i => pri(d.cards[i]) === 1 && !cleared(d.id, i));
+  if (mode === "explain") idxs = idxs.filter(i => canExplain(d.cards[i]) && !cleared(d.id, i));
   // 空欄（試験に出ると分かっている箇所）を先に、その中で苦手なものから
   idxs.sort((a,b) => {
     const A = st(d.id,a), B = st(d.id,b);
@@ -1103,15 +1280,18 @@ function showQuestion() {
   const d = deck();
   const dirLabel = d.dir === "term" ? "説明→用語" : "用語→意味";
   $("modeLabel").textContent =
-    mode === "fix"   ? "まちがい直し" :
-    mode === "blank" ? "空欄の残り"   :
-    mode === "rest"  ? "残りだけ"     : dirLabel;
+    mode === "fix"     ? "まちがい直し" :
+    mode === "blank"   ? "空欄の残り"   :
+    mode === "rest"    ? "残りだけ"     :
+    mode === "explain" ? "説明モード"   : dirLabel;
   $("modeLabel").classList.toggle("fix", mode === "fix");
   $("counter").textContent = `${Math.min(qi+1, queue.length)} / ${queue.length}`;
   $("barFill").style.width = queue.length ? (qi / queue.length * 100) + "%" : "0%";
   syncToolbar();
 
+  $("explainStage").classList.add("hidden");
   if (qi >= queue.length) return showDone();
+  if (mode === "explain") return showExplain();   // 4択ではなく記述の練習へ
 
   $("stage").classList.remove("hidden");
   $("doneBox").classList.add("hidden");
@@ -1192,6 +1372,7 @@ function nextQuestion() {
 
 function showDone() {
   $("stage").classList.add("hidden");
+  $("explainStage").classList.add("hidden");
   $("actionBar").classList.add("hidden");
   $("doneBox").classList.remove("hidden");
   const total = sess.ok + sess.ng;
@@ -1240,6 +1421,11 @@ function syncToolbar() {
   const nb = d.cards.filter((c,i) => pri(c) === 1 && !cleared(d.id, i)).length;
   const nr = d.cards.filter((_,i) => !cleared(d.id, i)).length;
   const nf = d.cards.filter((_,i) => st(d.id, i).pending).length;
+  const ne = d.cards.filter((c,i) => canExplain(c) && !cleared(d.id, i)).length;
+  $("explainModeBtn").textContent = "説明モード" + (ne ? " " + ne : "");
+  $("keyHint").innerHTML = mode === "explain"
+    ? "<kbd>Enter</kbd> で答えを見る　<kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> で自己採点"
+    : "<kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> で選択　<kbd>Enter</kbd> で次へ";
   $("blankModeBtn").classList.toggle("hidden", blankCount(d) === 0);
   $("blankModeBtn").textContent = "空欄だけ" + (nb ? " " + nb : "");
   $("restModeBtn").textContent  = "残りをやる" + (nr ? " " + nr : "");
@@ -1442,6 +1628,13 @@ function startMode(m, emptyMsg) {
   buildQueue();
   setView("quiz");
 }
+$("exRevealBtn").onclick = revealExplain;
+$("exKeyBtn").onclick = () => $("exKeys").classList.toggle("hidden");
+document.querySelectorAll("#exAfter .grade button").forEach(b => {
+  b.onclick = () => gradeExplain(Number(b.dataset.g));
+});
+$("explainModeBtn").onclick = () => startMode("explain",
+  `${deck().name} は説明モードの分をやり切った。「最初からやる」で頭から回せる。`);
 $("restModeBtn").onclick  = () => startMode("rest",
   `${deck().name} は全問正解済み。「最初からやる」で頭から回せる。`);
 $("blankModeBtn").onclick = () => startMode("blank",
@@ -1471,6 +1664,12 @@ $("copyBtn").onclick = () => { if ($("promptOut").value) copyText($("promptOut")
 
 document.addEventListener("keydown", e => {
   if ($("statsView").classList.contains("hidden") === false) return;
+
+  if (mode === "explain") {
+    if ((e.key === "Enter" || e.key === " ") && !answered) { e.preventDefault(); revealExplain(); }
+    else if (["1","2","3"].includes(e.key) && answered) gradeExplain(+e.key);
+    return;
+  }
   if (["1","2","3","4"].includes(e.key) && !answered) {
     const b = $("choices").children[+e.key - 1];
     if (b) b.click();
