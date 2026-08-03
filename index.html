@@ -1215,25 +1215,27 @@ function makeChoices(i) {
 function explainText(c) { return (pri(c) === 1 ? (c.def || "") : (c.m || "")).trim(); }
 function canExplain(c)  { return explainText(c).length >= 12; }
 
-// 説明文を「言うべきポイント」に割る。
-// 基本は句点で。日本語の定義文は読点で切ると「〜という」で途切れて意味をなさないので、
-// 読点まで踏み込むのは1文が50字を超える長文のときだけにする
+// 説明文を並べ替え用のブロックに割る。句点と読点の両方で切って短い単位にし、
+// 短すぎる断片は隣とくっつける。多くなりすぎたら短いもの同士から結合して6つまでに抑える
 function splitPoints(t) {
-  const out = [];
+  const raw = [];
   (t || "").split(/(?<=。)/).map(s => s.trim()).filter(Boolean).forEach(s => {
-    if (s.length <= 50) { out.push(s); return; }
-    let buf = "";
-    s.split(/(?<=、)/).filter(p => p.trim()).forEach(p => {
-      if (!buf || buf.length + p.length <= 40) buf += p;
-      else { out.push(buf); buf = p; }
-    });
-    if (buf) out.push(buf);
+    s.split(/(?<=、)/).map(p => p.trim()).filter(Boolean).forEach(p => raw.push(p));
   });
   const merged = [];
-  out.forEach(p => {
-    if (merged.length && p.length < 6) merged[merged.length - 1] += p;
+  raw.forEach(p => {
+    const prev = merged[merged.length - 1];
+    if (merged.length && (p.length < 8 || prev.length < 8)) merged[merged.length - 1] = prev + p;
     else merged.push(p);
   });
+  while (merged.length > 6) {
+    let at = 0, best = Infinity;
+    for (let k = 0; k < merged.length - 1; k++) {
+      const len = merged[k].length + merged[k+1].length;
+      if (len < best) { best = len; at = k; }
+    }
+    merged.splice(at, 2, merged[at] + merged[at+1]);
+  }
   return merged.map(p => p.replace(/、$/, ""));
 }
 
@@ -1244,9 +1246,28 @@ function keyOf(p) {
 }
 
 let exPts = [];      // 正しい順のブロック
-let exOrder = [];     // 画面に出す順（シャッフル済みの元index）
-let exPicked = [];    // 選んだ順（元indexの配列）
+let exAll = [];       // 正解ブロック＋まぎれこませたダミー（index が exPts.length 以上ならダミー）
+let exOrder = [];     // 画面に出す順（シャッフル済み）
+let exPicked = [];    // 選んだ順
 let exSortable = false;
+
+// 使ってはいけないブロックを混ぜる。まず混同しやすい用語、次に同じ回の用語の説明から取る
+function makeDummies(cardIdx, need) {
+  const d = deck(), c = d.cards[cardIdx], order = [];
+  const push = j => { if (j >= 0 && j !== cardIdx && !order.includes(j)) order.push(j); };
+  (c.cf || []).forEach(name => push(d.cards.findIndex(x => x.t === name)));
+  shuffle(d.cards.map((x, j) => x.src === c.src ? j : -1).filter(j => j >= 0)).forEach(push);
+  shuffle(d.cards.map((_, j) => j)).forEach(push);
+
+  const out = [];
+  for (const j of order) {
+    if (out.length >= need) break;
+    const cand = splitPoints(explainText(d.cards[j]))
+      .find(p => p.length >= 10 && !exPts.includes(p) && !out.includes(p));
+    if (cand) out.push(cand);
+  }
+  return out;
+}
 
 function showExplain() {
   const d = deck(), i = queue[qi], c = d.cards[i];
@@ -1279,11 +1300,16 @@ function showExplain() {
   $("exRevealBtn").classList.toggle("hidden", exSortable);
   $("exKeyBtn").classList.toggle("hidden", exSortable);
 
+  // 選択肢には使ってはいけないものも混ぜてある
+  const dummies = exSortable ? makeDummies(i, exPts.length >= 3 ? 2 : 1) : [];
+  exAll = [...exPts, ...dummies];
+
   $("exAsk").innerHTML = exSortable
-    ? `言うべきことは<span class="dots">${exPts.map(() => "<i></i>").join("")}</span><b>${exPts.length}つ</b>。正しい順に並べて説明を組み立てる。`
+    ? `言うべきことは<span class="dots">${exPts.map(() => "<i></i>").join("")}</span><b>${exPts.length}つ</b>。`
+      + (dummies.length ? `下には<b>使わないもの</b>も混ざっている。` : "") + `正しい順に並べて説明を組み立てる。`
     : `言うべきことは<b>1つ</b>。声に出すか、頭の中で組み立ててから答えを見る。`;
 
-  exOrder = shuffle(exPts.map((_, n) => n));
+  exOrder = shuffle(exAll.map((_, n) => n));
   renderSort();
 
   $("exKeys").innerHTML = exPts.map(p => `<span class="keychip">${esc(keyOf(p))}</span>`).join("");
@@ -1300,13 +1326,13 @@ function renderSort() {
 
   build.innerHTML = exPicked.length
     ? exPicked.map((n, k) =>
-        `<button class="blk" data-pick="${k}"><span class="slot">${k+1}</span><span>${esc(exPts[n])}</span></button>`).join("")
+        `<button class="blk" data-pick="${k}"><span class="slot">${k+1}</span><span>${esc(exAll[n])}</span></button>`).join("")
     : `<div class="placeholder">ここに組み立てる</div>`;
   build.classList.toggle("filled", exPicked.length > 0);
 
   const rest = exOrder.filter(n => !exPicked.includes(n));
   pool.innerHTML = rest.map(n =>
-    `<button class="blk inpool" data-pool="${n}"><span class="slot">＋</span><span>${esc(exPts[n])}</span></button>`).join("");
+    `<button class="blk inpool" data-pool="${n}"><span class="slot">＋</span><span>${esc(exAll[n])}</span></button>`).join("");
 
   build.querySelectorAll("[data-pick]").forEach(b => {
     b.onclick = () => { if (!answered) { exPicked.splice(+b.dataset.pick, 1); renderSort(); } };
@@ -1325,15 +1351,14 @@ function checkExplain() {
   answered = true;
   const correct = exPicked.every((n, k) => n === k);
 
-  $("exBuild").querySelectorAll("[data-pick]").forEach((b, k) => {
-    b.disabled = true;
-    b.classList.add(exPicked[k] === k ? "ok" : "bad");
-  });
-  $("exPool").querySelectorAll("[data-pool]").forEach(b => b.disabled = true);
+  markBlocks();
 
+  const usedDummy = exPicked.some(n => n >= exPts.length);
   const v = $("exVerdict");
   v.className = "verdict-line " + (correct ? "hit" : "miss");
-  v.textContent = correct ? "その順番で合っている" : "順番が違う。正しい並びはこちら";
+  v.textContent = correct ? "その順番で合っている"
+    : usedDummy ? "使わないものが混ざっている。正しい並びはこちら"
+    : "順番が違う。正しい並びはこちら";
   v.classList.remove("hidden");
 
   const d = deck(), i = queue[qi], s = st(d.id, i);
@@ -1349,6 +1374,20 @@ function checkExplain() {
   syncToolbar();
 }
 
+// 答え合わせ後の色づけ。選んだ側は位置が合っているか、残った側はダミーだったかを示す
+function markBlocks() {
+  $("exBuild").querySelectorAll("[data-pick]").forEach((b, k) => {
+    b.disabled = true;
+    b.classList.add(exPicked[k] === k ? "ok" : "bad");
+  });
+  $("exPool").querySelectorAll("[data-pool]").forEach(b => {
+    b.disabled = true;
+    const n = +b.dataset.pool;
+    b.classList.add(n >= exPts.length ? "bad" : "ok");
+    b.querySelector(".slot").textContent = n >= exPts.length ? "×" : "◯";
+  });
+}
+
 // 並べ替えを諦めたとき。答えを見せて、間違い扱いで戻ってくるようにする
 function giveUpExplain() {
   if (answered) return;
@@ -1359,8 +1398,7 @@ function giveUpExplain() {
   save();
   saveSession();
 
-  $("exBuild").querySelectorAll("button").forEach(b => b.disabled = true);
-  $("exPool").querySelectorAll("button").forEach(b => b.disabled = true);
+  markBlocks();
   const v = $("exVerdict");
   v.className = "verdict-line miss";
   v.textContent = "正しい並びはこちら";
@@ -1822,7 +1860,7 @@ document.addEventListener("keydown", e => {
       return;
     }
     if (exSortable) {
-      if (["1","2","3","4","5","6"].includes(e.key)) {
+      if (["1","2","3","4","5","6","7","8"].includes(e.key)) {
         const b = $("exPool").children[+e.key - 1];
         if (b) b.click();
       }
