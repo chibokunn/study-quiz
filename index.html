@@ -12,6 +12,8 @@
 </head>
 <body>
 <title>テスト対策 4択クイズ</title>
+<!-- 丸ゴシック。オフラインで開いたときは読み込めず、端末の標準フォントになる -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap">
 
 <style>
   :root {
@@ -443,6 +445,99 @@
   @media (hover: hover) {
     .who button:hover, .testbtn:not(:disabled):hover { border-color:var(--accent); }
   }
+
+  /* ==========================================================================
+     ポップ版の見た目（上の基本スタイルを上書きする）
+     丸ゴシック・明るい色・ぷっくりしたボタン。人ごとにテーマ色が変わる
+     （俺＝むらさき寄りの青、弟＝オレンジ）
+     ========================================================================== */
+  :root, :root[data-theme="light"] {
+    --paper:#FFF7EC; --surface:#FFFFFF; --surface2:#FFFBF5; --edge:#F0E2CF;
+    --ink:#2B2340; --ink-soft:#6B6380; --ink-faint:#A49CB5;
+    --accent:#5B5BF0; --accent-dim:#ECEBFF; --accent2:#FFC93C;
+    --marker:#E89B00; --marker-dim:#FFF1CC;
+    --ok:#1FAF6B; --ok-dim:#DDF7EA;
+    --ng:#F0506E; --ng-dim:#FFE3E8;
+    --shadow:0 4px 0 rgba(43,35,64,.08), 0 10px 24px -14px rgba(43,35,64,.25);
+    --pop:0 4px 0 color-mix(in srgb, var(--accent) 60%, #000);
+    --font-ui:"M PLUS Rounded 1c",system-ui,-apple-system,"Hiragino Maru Gothic ProN","Yu Gothic UI",Meiryo,sans-serif;
+    --font-term:var(--font-ui);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:#17142A; --surface:#221E3A; --surface2:#2A2547; --edge:#3A3460;
+      --ink:#F3F0FF; --ink-soft:#B9B2D6; --ink-faint:#7F78A3;
+      --accent:#8C8CFF; --accent-dim:#2E2B5C; --accent2:#FFD45C;
+      --marker:#FFC24D; --marker-dim:#3D3218;
+      --ok:#4FD69A; --ok-dim:#183A2C; --ng:#FF7A93; --ng-dim:#45202B;
+      --shadow:0 4px 0 rgba(0,0,0,.35), 0 10px 24px -14px rgba(0,0,0,.6);
+    }
+  }
+  body[data-who="otouto"] { --accent:#FF7A2F; --accent-dim:#FFEADB; }
+  @media (prefers-color-scheme: dark) { body[data-who="otouto"] { --accent:#FF9A5C; --accent-dim:#45291A; } }
+
+  body {
+    background:
+      radial-gradient(circle at 8% 4%, color-mix(in srgb, var(--accent2) 22%, transparent) 0 9rem, transparent 9.1rem),
+      radial-gradient(circle at 96% 18%, color-mix(in srgb, var(--accent) 14%, transparent) 0 7rem, transparent 7.1rem),
+      var(--paper);
+    background-attachment:fixed;
+    font-weight:500;
+  }
+  .brand h1 { font-weight:800; font-size:1.1rem; }
+  .card, .done, .panel { border-radius:20px; border-width:2px; }
+  .tab { border-width:2px; font-weight:700; }
+  .tab[aria-selected="true"] { box-shadow:var(--pop); color:#fff; }
+  .views button { border-radius:999px; border-width:2px; }
+  .views button[aria-pressed="true"] { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .term { font-weight:800; }
+  .choice { border-width:2px; border-radius:16px; box-shadow:0 3px 0 var(--edge); font-weight:500; }
+  .choice:active:not(:disabled) { transform:translateY(2px); box-shadow:0 1px 0 var(--edge); }
+  .choice .no { border:none; border-radius:50%; background:var(--accent-dim); color:var(--accent); font-weight:800; }
+  .choice .body.t { font-weight:800; }
+  .choice.correct { box-shadow:0 3px 0 var(--ok); animation:boing .45s cubic-bezier(.3,1.6,.5,1); }
+  .choice.correct .no { background:var(--ok); color:#fff; }
+  .choice.picked-wrong { box-shadow:0 3px 0 var(--ng); animation:shake .35s ease; }
+  .choice.picked-wrong .no { background:var(--ng); color:#fff; }
+  .choice.correct .mark::before { content:"⭕ "; }
+  .choice.picked-wrong .mark::before { content:"❌ "; }
+  @keyframes boing { 0% { transform:scale(1); } 40% { transform:scale(1.04); } 100% { transform:scale(1); } }
+  @keyframes shake { 0%,100% { transform:translateX(0); } 25% { transform:translateX(-6px); } 75% { transform:translateX(6px); } }
+  @media (prefers-reduced-motion: reduce) { .choice.correct, .choice.picked-wrong { animation:none; } }
+
+  button.btn { border-radius:999px; box-shadow:var(--pop); font-weight:800; color:#fff; }
+  button.btn:active { transform:translateY(3px); box-shadow:0 1px 0 color-mix(in srgb, var(--accent) 60%, #000); }
+  button.btn-quiet { border-radius:999px; border-width:2px; font-weight:700; }
+  .status .mode { border-radius:999px; font-weight:800; }
+  .bar { height:8px; border-radius:99px; }
+  .bar i { border-radius:99px; background:linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 55%, var(--accent2))); }
+  .blankchip, .flagchip, .pill { border-radius:999px; }
+  .score { color:var(--accent); }
+  .done h2 { font-weight:800; }
+  .doneemoji { font-size:3.2rem; line-height:1; animation:boing .6s cubic-bezier(.3,1.6,.5,1); }
+
+  /* ホーム */
+  .home h1 { font-weight:800; font-size:1.9rem; }
+  .home .eyebrow { font-weight:800; color:var(--accent); letter-spacing:.15em; }
+  .who button {
+    border:none; border-radius:24px; color:#fff; padding:1.6rem .8rem 1.3rem;
+    box-shadow:0 6px 0 rgba(0,0,0,.18);
+  }
+  .who button:active { transform:translateY(4px); box-shadow:0 2px 0 rgba(0,0,0,.18); }
+  .who button .ic { font-size:2.8rem; line-height:1; }
+  .who button b { font-weight:800; font-size:1.7rem; }
+  .who button span { color:rgba(255,255,255,.88); font-weight:700; }
+  .who button.p-ore { background:linear-gradient(150deg, #7B7BFF, #5B5BF0 60%, #4646C8); }
+  .who button.p-otouto { background:linear-gradient(150deg, #FFA15C, #FF7A2F 60%, #E85E14); }
+  .testbtn { border:2px solid var(--edge); border-left:2px solid var(--edge); border-radius:20px; padding:1.1rem 1.2rem; }
+  .testbtn:not(:disabled) { border-color:var(--accent); box-shadow:0 5px 0 color-mix(in srgb, var(--accent) 35%, transparent); }
+  .testbtn:not(:disabled):active { transform:translateY(3px); box-shadow:0 2px 0 color-mix(in srgb, var(--accent) 35%, transparent); }
+  .testbtn .nm { font-weight:800; font-size:1.3rem; }
+  .testbtn .nm::after { content:" ›"; color:var(--accent); }
+  .testbtn:disabled .nm::after { content:""; }
+  .testbtn .soon::before { content:"🛠 "; }
+  .resume { border-radius:999px; border:2px dashed var(--accent); font-weight:800; }
+  .homebtn { font-weight:800; }
 </style>
 
 <div class="wrap">
@@ -549,6 +644,7 @@
     </section>
 
     <section id="doneBox" class="done hidden">
+      <div class="doneemoji" id="doneEmoji"></div>
       <h2 id="doneTitle"></h2>
       <div class="score" id="doneScore"></div>
       <p class="hint" id="doneHint"></p>
@@ -1191,12 +1287,12 @@ const DECKS_ORE_2026_1 = [
    legacy … 人・テスト切り替えを入れる前からの記録（保存キー）をそのまま使う
    ========================================================================== */
 const PEOPLE = [
-  { id:"ore", name:"俺", note:"仁愛大学", level:"大学の試験勉強",
+  { id:"ore", name:"俺", icon:"🎓", note:"仁愛大学", level:"大学の試験勉強",
     tests:[
       { id:"2026-1", name:"2026前期", note:"期末テスト", decks:DECKS_ORE_2026_1, legacy:true },
       { id:"2026-2", name:"2026後期", note:"期末テスト", decks:[] },
     ] },
-  { id:"otouto", name:"弟", note:"中学生", level:"中学校のテスト勉強",
+  { id:"otouto", name:"弟", icon:"📚", note:"中学2年", level:"中学校のテスト勉強",
     tests:[
       { id:"2026-11", name:"11月確認テスト", note:"", decks:[] },
     ] },
@@ -1652,6 +1748,7 @@ function showDone() {
   $("doneBox").classList.remove("hidden");
   const total = sess.ok + sess.ng;
   const pct = total ? Math.round(sess.ok / total * 100) : 0;
+  $("doneEmoji").textContent = !total ? "✨" : pct >= 90 ? "🎉" : pct >= 70 ? "👍" : pct >= 50 ? "💪" : "🔥";
   $("doneTitle").textContent = mode === "fix" ? "まちがい直し、ここまで。" : `${deck().name}　一周した。`;
   $("doneScore").innerHTML = total ? `${pct}<small>％　${sess.ok}/${total}問</small>` : "—";
   const d = deck();
@@ -2002,17 +2099,19 @@ function showHome(pid) {
   window.scrollTo({ top: 0, behavior: "instant" });
 
   const p = PEOPLE.find(x => x.id === pid);
+  if (p) document.body.dataset.who = p.id; else delete document.body.dataset.who;
   $("whoList").classList.toggle("hidden", !!p);
   $("testList").classList.toggle("hidden", !p);
   $("whoBack").classList.toggle("hidden", !p);
 
   // 1段目：だれのテスト？
   if (!p) {
-    $("homeTitle").textContent = "だれのテスト？";
+    $("homeTitle").textContent = "だれのテスト？👀";
     $("whoList").innerHTML = "";
     PEOPLE.forEach(x => {
       const b = document.createElement("button");
-      b.innerHTML = `<b>${esc(x.name)}</b><span>${esc(x.note)}</span>`;
+      b.className = "p-" + x.id;
+      b.innerHTML = `<span class="ic">${x.icon}</span><b>${esc(x.name)}</b><span>${esc(x.note)}</span>`;
       b.onclick = () => showHome(x.id);
       $("whoList").appendChild(b);
     });
@@ -2029,7 +2128,7 @@ function showHome(pid) {
 
   // 2段目：どのテスト？
   $("resumeBtn").classList.add("hidden");
-  $("homeTitle").textContent = `${p.name}のテスト`;
+  $("homeTitle").textContent = `${p.icon} ${p.name}のテスト`;
   const box = $("testList");
   box.innerHTML = "";
   p.tests.forEach(t => {
@@ -2053,6 +2152,7 @@ function showHome(pid) {
 
 function openTest(p, t) {
   person = p; test = t; DECKS = t.decks;
+  document.body.dataset.who = p.id;
   STORE = keyFor(p, t, "v2");
   SESS_STORE = keyFor(p, t, "sess");
   stats = load();
