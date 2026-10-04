@@ -399,13 +399,73 @@
     .toolbar .group .btn-quiet { flex:1 1 auto; }
     .donebtns .btn, .donebtns .btn-quiet { min-width:100%; }
   }
+
+  /* ------------------------------ ホーム ------------------------------ */
+  #appView { display:flex; flex-direction:column; gap:.9rem; }
+  .homebtn {
+    flex:0 1 auto; min-width:0; border:none; background:none; color:var(--accent);
+    font-family:inherit; font-size:.8rem; font-weight:600; padding:.3rem .1rem;
+    min-height:44px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .brand .left { display:flex; flex-direction:column; min-width:0; line-height:1.3; }
+  .brand .left .homebtn { min-height:0; padding:.15rem 0; text-align:left; }
+
+  .home { padding:2.6rem 0 1rem; display:flex; flex-direction:column; gap:1.4rem; }
+  .home .eyebrow { margin:0; font-size:.75rem; letter-spacing:.2em; color:var(--ink-faint); }
+  .home h1 { margin:.2rem 0 0; font-family:var(--font-term); font-size:1.6rem; font-weight:600; letter-spacing:.04em; }
+  .who { display:grid; grid-template-columns:1fr 1fr; gap:.8rem; }
+  .who button {
+    border:1px solid var(--edge); background:var(--surface); color:var(--ink);
+    border-radius:12px; box-shadow:var(--shadow); cursor:pointer; font-family:inherit;
+    padding:1.6rem 1rem 1.3rem; display:flex; flex-direction:column; align-items:center; gap:.35rem;
+    touch-action:manipulation; transition:border-color .12s, transform .12s;
+  }
+  .who button b { font-family:var(--font-term); font-size:2rem; font-weight:600; line-height:1.2; }
+  .who button span { font-size:.78rem; color:var(--ink-soft); }
+  .who button:active { transform:scale(.98); }
+  .tests { display:flex; flex-direction:column; gap:.7rem; }
+  .testbtn {
+    border:1px solid var(--edge); background:var(--surface); color:var(--ink);
+    border-left:4px solid var(--accent); border-radius:10px; box-shadow:var(--shadow);
+    font-family:inherit; text-align:left; cursor:pointer; padding:1rem 1.1rem;
+    display:flex; flex-direction:column; gap:.45rem; touch-action:manipulation;
+  }
+  .testbtn .nm { font-family:var(--font-term); font-size:1.25rem; font-weight:600; }
+  .testbtn .meta { font-size:.8rem; color:var(--ink-soft); }
+  .testbtn .bar { flex:none; height:5px; }
+  .testbtn:disabled { border-left-color:var(--edge); box-shadow:none; cursor:default; opacity:.6; }
+  .testbtn .soon { font-size:.72rem; font-weight:700; color:var(--ink-faint); letter-spacing:.08em; }
+  .resume {
+    border:1px dashed var(--accent); background:var(--accent-dim); color:var(--accent);
+    border-radius:10px; font-family:inherit; font-size:.9rem; font-weight:600;
+    padding:.8rem 1rem; min-height:var(--tap); cursor:pointer; text-align:left;
+  }
+  @media (hover: hover) {
+    .who button:hover, .testbtn:not(:disabled):hover { border-color:var(--accent); }
+  }
 </style>
 
 <div class="wrap">
 
+  <!-- ============ ホーム：だれの → どのテスト ============ -->
+  <div id="homeView" class="home">
+    <div>
+      <p class="eyebrow">テスト対策</p>
+      <h1 id="homeTitle">だれのテスト？</h1>
+    </div>
+    <div class="who" id="whoList"></div>
+    <div class="tests hidden" id="testList"></div>
+    <button class="btn-quiet hidden" id="whoBack" style="align-self:flex-start">‹ えらびなおす</button>
+    <button class="resume hidden" id="resumeBtn"></button>
+  </div>
+
+  <div id="appView" class="hidden">
   <header>
     <div class="brand">
-      <h1 id="deckTitle">テスト対策</h1>
+      <div class="left">
+        <button class="homebtn" id="homeBtn">‹ ホーム</button>
+        <h1 id="deckTitle">テスト対策</h1>
+      </div>
       <div class="views">
         <button id="vQuiz" aria-pressed="true">出題</button>
         <button id="vStats" aria-pressed="false">分析</button>
@@ -562,8 +622,9 @@
       <p class="empty hidden" id="flagEmpty">この科目に要確認の項目はない。</p>
     </section>
   </div>
+  </div>
 
-  <p class="hint">記録はこの端末のブラウザに保存される。</p>
+  <p class="hint">記録はこの端末のブラウザに、人・テストごとに分けて保存される。</p>
 </div>
 
 <div class="actionbar hidden" id="actionBar">
@@ -581,7 +642,7 @@
    t 用語 / m 意味 / src 出典 / cf 混同しやすい用語（誤答選択肢に優先採用）
    warn 答えの確度が低い / note 補足
    ========================================================================== */
-const DECKS = [
+const DECKS_ORE_2026_1 = [
   {
     id: "chosa", name: "社会調査法", dir: "meaning",
     cards: [
@@ -1124,13 +1185,38 @@ const DECKS = [
   }
 ];
 
+/* ==========================================================================
+   だれの・どのテストか。ホームで「人 → テスト」の順に選ぶ。
+   decks が空のテストはホームで「準備中」と出て押せない。
+   legacy … 人・テスト切り替えを入れる前からの記録（保存キー）をそのまま使う
+   ========================================================================== */
+const PEOPLE = [
+  { id:"ore", name:"俺", note:"仁愛大学", level:"大学の試験勉強",
+    tests:[
+      { id:"2026-1", name:"2026前期", note:"期末テスト", decks:DECKS_ORE_2026_1, legacy:true },
+      { id:"2026-2", name:"2026後期", note:"期末テスト", decks:[] },
+    ] },
+  { id:"otouto", name:"弟", note:"中学生", level:"中学校のテスト勉強",
+    tests:[
+      { id:"2026-11", name:"11月確認テスト", note:"", decks:[] },
+    ] },
+];
+let person = null, test = null, DECKS = [];
+
 /* 科目をまたいで出てくる用語（社会調査法と社会学入門は範囲が重なる） */
 const DUP = {};
-DECKS.forEach(d => d.cards.forEach(c => { (DUP[c.t] = DUP[c.t] || []).push(d.name); }));
+function buildDup() {
+  Object.keys(DUP).forEach(k => delete DUP[k]);
+  DECKS.forEach(d => d.cards.forEach(c => { (DUP[c.t] = DUP[c.t] || []).push(d.name); }));
+}
 
 /* ---------------------------- 状態 ---------------------------- */
-const STORE = "test-taisaku-v2";
-let stats = load();           // stats[deckId][cardIdx] = {seen,ok,wrong,pending,picks:{otherIdx:n}}
+// 記録は人・テストごとに別のキーへ。弟と同じ端末で使っても混ざらない
+const keyFor = (p, t, kind) => t.legacy
+  ? (kind === "sess" ? "test-taisaku-sess-v1" : "test-taisaku-v2")
+  : `test-taisaku-${kind === "sess" ? "sess-v1" : "v2"}:${p.id}/${t.id}`;
+let STORE = "test-taisaku-v2";
+let stats = {};               // stats[deckId][cardIdx] = {seen,ok,wrong,pending,picks:{otherIdx:n}}
 let deckIdx = 0;
 let mode = "all";             // "all" | "fix"
 let queue = [];
@@ -1147,8 +1233,8 @@ function save() { try { localStorage.setItem(STORE, JSON.stringify(stats)); } ca
    行き来しても、続きから再開できる。保存先は localStorage なので、記録は
    その端末のそのブラウザだけのもの。同じURLを別の人が開いても混ざらない。
    ---------------------------------------------------------------------- */
-const SESS_STORE = "test-taisaku-sess-v1";
-let sessions = loadSessions();
+let SESS_STORE = "test-taisaku-sess-v1";
+let sessions = { lastDeck: null, byDeck: {} };
 
 function loadSessions() {
   try {
@@ -1756,7 +1842,7 @@ function buildPrompt(all) {
     return "まだ間違いの記録がありません。何問か解いてから、もう一度このボタンを押してください。";
   }
 
-  return `大学の試験勉強で、4択の一問一答を解いています。以下が私のまちがえた用語と、そのとき取り違えた相手です。
+  return `${person.level}で、4択の一問一答を解いています。以下が私のまちがえた用語と、そのとき取り違えた相手です。
 
 ${blocks.join("\n\n")}
 
@@ -1866,6 +1952,7 @@ $("genAllBtn").onclick = () => copyText(buildPrompt(true));
 $("copyBtn").onclick = () => { if ($("promptOut").value) copyText($("promptOut").value); };
 
 document.addEventListener("keydown", e => {
+  if (!$("homeView").classList.contains("hidden")) return;
   if ($("statsView").classList.contains("hidden") === false) return;
 
   if (mode === "explain") {
@@ -1891,11 +1978,101 @@ document.addEventListener("keydown", e => {
   if ((e.key === "Enter" || e.key === " ") && answered) { e.preventDefault(); nextQuestion(); }
 });
 
-// 前回開いていた科目を思い出して、その続きから始める
-const lastIdx = DECKS.findIndex(d => d.id === sessions.lastDeck);
-if (lastIdx >= 0) deckIdx = lastIdx;
-renderTabs();
-resumeOrBuild();
+/* ---------------------------- ホーム ---------------------------- */
+const HOME_STORE = "test-taisaku-home-v1";
+function loadHome() { try { return JSON.parse(localStorage.getItem(HOME_STORE)) || {}; } catch { return {}; } }
+
+// そのテストの「正解済み／全問」。ホームのカードに進み具合として出す
+function testProgress(p, t) {
+  let st = {};
+  try { st = JSON.parse(localStorage.getItem(keyFor(p, t, "v2"))) || {}; } catch {}
+  let total = 0, done = 0;
+  t.decks.forEach(d => d.cards.forEach((_, i) => {
+    total++;
+    const s = st[d.id]?.[i];
+    if (s && (typeof s.c === "boolean" ? s.c : s.ok > 0 && !s.pending)) done++;
+  }));
+  return { total, done };
+}
+
+function showHome(pid) {
+  $("appView").classList.add("hidden");
+  $("actionBar").classList.add("hidden");
+  $("homeView").classList.remove("hidden");
+  window.scrollTo({ top: 0, behavior: "instant" });
+
+  const p = PEOPLE.find(x => x.id === pid);
+  $("whoList").classList.toggle("hidden", !!p);
+  $("testList").classList.toggle("hidden", !p);
+  $("whoBack").classList.toggle("hidden", !p);
+
+  // 1段目：だれのテスト？
+  if (!p) {
+    $("homeTitle").textContent = "だれのテスト？";
+    $("whoList").innerHTML = "";
+    PEOPLE.forEach(x => {
+      const b = document.createElement("button");
+      b.innerHTML = `<b>${esc(x.name)}</b><span>${esc(x.note)}</span>`;
+      b.onclick = () => showHome(x.id);
+      $("whoList").appendChild(b);
+    });
+    // 前回のつづきへ1タップで
+    const h = loadHome();
+    const lp = PEOPLE.find(x => x.id === h.p), lt = lp?.tests.find(t => t.id === h.t);
+    $("resumeBtn").classList.toggle("hidden", !(lt && lt.decks.length));
+    if (lt && lt.decks.length) {
+      $("resumeBtn").textContent = `前回のつづき：${lp.name}／${lt.name}　›`;
+      $("resumeBtn").onclick = () => openTest(lp, lt);
+    }
+    return;
+  }
+
+  // 2段目：どのテスト？
+  $("resumeBtn").classList.add("hidden");
+  $("homeTitle").textContent = `${p.name}のテスト`;
+  const box = $("testList");
+  box.innerHTML = "";
+  p.tests.forEach(t => {
+    const b = document.createElement("button");
+    b.className = "testbtn";
+    if (!t.decks.length) {
+      b.disabled = true;
+      b.innerHTML = `<span class="nm">${esc(t.name)}</span><span class="soon">準備中　問題はまだ入っていない</span>`;
+    } else {
+      const { total, done } = testProgress(p, t);
+      const pct = total ? Math.round(done / total * 100) : 0;
+      b.innerHTML = `<span class="nm">${esc(t.name)}</span>
+        <span class="meta">${esc(t.decks.map(d => d.name).join("・"))}</span>
+        <span class="meta">${t.decks.length}科目・${total}問　正解済み ${done}問（${pct}%）</span>
+        <span class="bar"><i style="width:${pct}%"></i></span>`;
+      b.onclick = () => openTest(p, t);
+    }
+    box.appendChild(b);
+  });
+}
+
+function openTest(p, t) {
+  person = p; test = t; DECKS = t.decks;
+  STORE = keyFor(p, t, "v2");
+  SESS_STORE = keyFor(p, t, "sess");
+  stats = load();
+  sessions = loadSessions();
+  buildDup();
+  try { localStorage.setItem(HOME_STORE, JSON.stringify({ p: p.id, t: t.id })); } catch {}
+  // 前回開いていた科目を思い出して、その続きから始める
+  deckIdx = Math.max(0, DECKS.findIndex(d => d.id === sessions.lastDeck));
+  mode = "all";
+  $("homeBtn").textContent = `‹ ${p.name}／${t.name}`;
+  $("homeView").classList.add("hidden");
+  $("appView").classList.remove("hidden");
+  renderTabs();
+  resumeOrBuild();
+  setView("quiz");
+}
+
+$("homeBtn").onclick = () => showHome(person?.id);
+$("whoBack").onclick = () => showHome();
+showHome();
 </script>
 
 </body>
