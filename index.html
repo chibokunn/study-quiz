@@ -12,8 +12,8 @@
 </head>
 <body>
 <title>テスト対策 4択クイズ</title>
-<!-- 丸ゴシック。オフラインで開いたときは読み込めず、端末の標準フォントになる -->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap">
+<!-- 和文 Noto Sans JP・数字 Inter。オフラインで開いたときは読み込めず、端末の標準フォントになる -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Inter:wght@500;600;700&display=swap">
 
 <style>
   :root {
@@ -447,97 +447,159 @@
   }
 
   /* ==========================================================================
-     ポップ版の見た目（上の基本スタイルを上書きする）
-     丸ゴシック・明るい色・ぷっくりしたボタン。人ごとにテーマ色が変わる
-     （俺＝むらさき寄りの青、弟＝オレンジ）
+     見た目（上の基本スタイルを上書きする）
+     青と白を基調にしたすっきりした見た目。人ごとに青の濃さだけ変える（俺＝濃い青、弟＝明るい青）
      ========================================================================== */
   :root, :root[data-theme="light"] {
-    --paper:#FFF7EC; --surface:#FFFFFF; --surface2:#FFFBF5; --edge:#F0E2CF;
-    --ink:#2B2340; --ink-soft:#6B6380; --ink-faint:#A49CB5;
-    --accent:#5B5BF0; --accent-dim:#ECEBFF; --accent2:#FFC93C;
-    --marker:#E89B00; --marker-dim:#FFF1CC;
-    --ok:#1FAF6B; --ok-dim:#DDF7EA;
-    --ng:#F0506E; --ng-dim:#FFE3E8;
-    --shadow:0 4px 0 rgba(43,35,64,.08), 0 10px 24px -14px rgba(43,35,64,.25);
-    --pop:0 4px 0 color-mix(in srgb, var(--accent) 60%, #000);
-    --font-ui:"M PLUS Rounded 1c",system-ui,-apple-system,"Hiragino Maru Gothic ProN","Yu Gothic UI",Meiryo,sans-serif;
+    --paper:#F5F8FC; --surface:#FFFFFF; --surface2:#F8FAFD; --edge:#E2E8F1;
+    --ink:#0E1A2B; --ink-soft:#56657A; --ink-faint:#93A1B5;
+    --accent:#1F5BD8; --accent-dim:#EAF1FE;
+    --marker:#B7791F; --marker-dim:#FDF3E1;
+    --ok:#0E8F6E; --ok-dim:#E5F6F0;
+    --ng:#D33B4B; --ng-dim:#FDECEE;
+    --shadow:0 1px 2px rgba(14,26,43,.04), 0 6px 20px -12px rgba(14,26,43,.16);
+    --font-ui:"Noto Sans JP",system-ui,-apple-system,"Hiragino Sans","Yu Gothic UI",Meiryo,sans-serif;
     --font-term:var(--font-ui);
+    --font-num:"Inter","Noto Sans JP",ui-monospace,Menlo,Consolas,monospace;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --paper:#17142A; --surface:#221E3A; --surface2:#2A2547; --edge:#3A3460;
-      --ink:#F3F0FF; --ink-soft:#B9B2D6; --ink-faint:#7F78A3;
-      --accent:#8C8CFF; --accent-dim:#2E2B5C; --accent2:#FFD45C;
-      --marker:#FFC24D; --marker-dim:#3D3218;
-      --ok:#4FD69A; --ok-dim:#183A2C; --ng:#FF7A93; --ng-dim:#45202B;
-      --shadow:0 4px 0 rgba(0,0,0,.35), 0 10px 24px -14px rgba(0,0,0,.6);
+      --paper:#0A111E; --surface:#101A2C; --surface2:#132036; --edge:#1F2D45;
+      --ink:#E7EEF8; --ink-soft:#9FB0C7; --ink-faint:#64748B;
+      --accent:#5B9BFF; --accent-dim:#14264A;
+      --marker:#E7B45A; --marker-dim:#2E2412;
+      --ok:#34C79A; --ok-dim:#0F2A24; --ng:#FF6B7A; --ng-dim:#3A1820;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 6px 20px -12px rgba(0,0,0,.6);
     }
   }
-  body[data-who="otouto"] { --accent:#FF7A2F; --accent-dim:#FFEADB; }
-  @media (prefers-color-scheme: dark) { body[data-who="otouto"] { --accent:#FF9A5C; --accent-dim:#45291A; } }
+  body[data-who="otouto"] { --accent:#1E8FE0; --accent-dim:#E6F4FD; }
+  @media (prefers-color-scheme: dark) { body[data-who="otouto"] { --accent:#4FB3FF; --accent-dim:#11304A; } }
 
   body {
-    background:
-      radial-gradient(circle at 8% 4%, color-mix(in srgb, var(--accent2) 22%, transparent) 0 9rem, transparent 9.1rem),
-      radial-gradient(circle at 96% 18%, color-mix(in srgb, var(--accent) 14%, transparent) 0 7rem, transparent 7.1rem),
-      var(--paper);
-    background-attachment:fixed;
-    font-weight:500;
+    background:linear-gradient(180deg, var(--accent-dim) 0, var(--paper) 22rem) no-repeat, var(--paper);
+    font-weight:400; letter-spacing:.01em;
   }
-  .brand h1 { font-weight:800; font-size:1.1rem; }
-  .card, .done, .panel { border-radius:20px; border-width:2px; }
-  .tab { border-width:2px; font-weight:700; }
-  .tab[aria-selected="true"] { box-shadow:var(--pop); color:#fff; }
-  .views button { border-radius:999px; border-width:2px; }
-  .views button[aria-pressed="true"] { background:var(--accent); border-color:var(--accent); color:#fff; }
-  .term { font-weight:800; }
-  .choice { border-width:2px; border-radius:16px; box-shadow:0 3px 0 var(--edge); font-weight:500; }
-  .choice:active:not(:disabled) { transform:translateY(2px); box-shadow:0 1px 0 var(--edge); }
-  .choice .no { border:none; border-radius:50%; background:var(--accent-dim); color:var(--accent); font-weight:800; }
-  .choice .body.t { font-weight:800; }
-  .choice.correct { box-shadow:0 3px 0 var(--ok); animation:boing .45s cubic-bezier(.3,1.6,.5,1); }
-  .choice.correct .no { background:var(--ok); color:#fff; }
-  .choice.picked-wrong { box-shadow:0 3px 0 var(--ng); animation:shake .35s ease; }
-  .choice.picked-wrong .no { background:var(--ng); color:#fff; }
-  .choice.correct .mark::before { content:"⭕ "; }
-  .choice.picked-wrong .mark::before { content:"❌ "; }
-  @keyframes boing { 0% { transform:scale(1); } 40% { transform:scale(1.04); } 100% { transform:scale(1); } }
-  @keyframes shake { 0%,100% { transform:translateX(0); } 25% { transform:translateX(-6px); } 75% { transform:translateX(6px); } }
-  @media (prefers-reduced-motion: reduce) { .choice.correct, .choice.picked-wrong { animation:none; } }
+  header { background:color-mix(in srgb, var(--surface) 88%, transparent); }
+  .brand h1 { font-weight:700; font-size:1.05rem; letter-spacing:.02em; }
+  .homebtn { font-weight:600; font-size:.75rem; letter-spacing:.04em; }
+  .views { background:var(--surface2); border:1px solid var(--edge); border-radius:10px; padding:3px; gap:2px; }
+  .views button { border:none; background:none; min-height:36px; border-radius:7px; font-weight:600; padding:.3rem .85rem; }
+  .views button[aria-pressed="true"] { background:var(--surface); color:var(--accent); border:none; box-shadow:0 1px 3px rgba(14,26,43,.12); }
 
-  button.btn { border-radius:999px; box-shadow:var(--pop); font-weight:800; color:#fff; }
-  button.btn:active { transform:translateY(3px); box-shadow:0 1px 0 color-mix(in srgb, var(--accent) 60%, #000); }
-  button.btn-quiet { border-radius:999px; border-width:2px; font-weight:700; }
-  .status .mode { border-radius:999px; font-weight:800; }
-  .bar { height:8px; border-radius:99px; }
-  .bar i { border-radius:99px; background:linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 55%, var(--accent2))); }
-  .blankchip, .flagchip, .pill { border-radius:999px; }
-  .score { color:var(--accent); }
-  .done h2 { font-weight:800; }
-  .doneemoji { font-size:3.2rem; line-height:1; animation:boing .6s cubic-bezier(.3,1.6,.5,1); }
+  /* 教科タブ：下線で選択を示す */
+  .tabs { gap:0; border-bottom:1px solid var(--edge); padding-bottom:0; }
+  .tab {
+    border:none; background:none; border-radius:0; min-height:42px; padding:.45rem .85rem;
+    border-bottom:2px solid transparent; margin-bottom:-1px; font-weight:600; color:var(--ink-soft);
+  }
+  .tab[aria-selected="true"] { background:none; color:var(--accent); border-bottom-color:var(--accent); }
+  .tab .cnt { font-weight:500; }
+  @media (hover: hover) { .tab:hover { color:var(--accent); } }
+  /* 教科の中の切り替え：セグメント */
+  .seg {
+    display:flex; gap:2px; padding:3px; background:var(--surface2); border:1px solid var(--edge);
+    border-radius:10px; overflow-x:auto; scrollbar-width:none;
+  }
+  .seg::-webkit-scrollbar { display:none; }
+  .seg button {
+    flex:1 0 auto; border:none; background:none; color:var(--ink-soft); font-family:inherit;
+    font-size:.85rem; font-weight:600; min-height:38px; padding:.3rem .8rem; border-radius:7px;
+    cursor:pointer; white-space:nowrap; touch-action:manipulation;
+  }
+  .seg button[aria-selected="true"] { background:var(--surface); color:var(--accent); box-shadow:0 1px 3px rgba(14,26,43,.12); }
+  .seg .cnt { font-family:var(--font-num); font-size:.7rem; color:var(--ng); margin-left:.35rem; }
+
+  .memo { border-left:none; border-radius:10px; background:var(--surface); border:1px solid var(--edge); font-size:.78rem; }
+  .card, .done, .panel { border-radius:16px; border:1px solid var(--edge); box-shadow:var(--shadow); }
+  .card.blank { border-left:3px solid var(--accent); }
+  .term { font-weight:700; letter-spacing:.01em; }
+  .meaning { font-size:1.08rem; font-weight:500; }
+  .plabel { font-weight:600; color:var(--accent); letter-spacing:.08em; }
+
+  .choice { border:1px solid var(--edge); background:var(--surface); border-radius:12px; box-shadow:none; font-weight:500; transition:border-color .15s, background .15s, transform .08s; }
+  .choice:active:not(:disabled) { transform:scale(.99); background:var(--accent-dim); }
+  .choice .no { border:1px solid var(--edge); border-radius:8px; background:var(--surface2); color:var(--ink-faint); font-family:var(--font-num); font-weight:600; }
+  .choice .body.t { font-weight:700; }
+  .choice.correct { border-color:var(--ok); background:var(--ok-dim); }
+  .choice.correct .no { background:var(--ok); border-color:var(--ok); color:#fff; }
+  .choice.picked-wrong { border-color:var(--ng); background:var(--ng-dim); }
+  .choice.picked-wrong .no { background:var(--ng); border-color:var(--ng); color:#fff; }
+  @media (hover: hover) { .choice:hover:not(:disabled) { border-color:var(--accent); } }
+
+  button.btn { border-radius:10px; border:none; background:var(--accent); color:#fff; font-weight:600; letter-spacing:.04em; box-shadow:0 6px 16px -8px var(--accent); }
+  button.btn:active { transform:scale(.99); }
+  button.btn-quiet { border-radius:10px; border:1px solid var(--edge); font-weight:600; }
+  @media (hover: hover) { button.btn:hover { background:color-mix(in srgb, var(--accent) 88%, #000); } }
+  .status .mode { border-radius:6px; font-weight:600; background:var(--accent-dim); border-color:transparent; }
+  .bar { height:4px; border-radius:99px; }
+  .bar i { border-radius:99px; background:var(--accent); }
+  .blankchip, .flagchip, .pill { border-radius:6px; }
+  .score { color:var(--accent); font-family:var(--font-num); }
+  .done h2 { font-weight:700; }
+  .doneemoji { display:none; }
+  .actionbar { background:color-mix(in srgb, var(--surface) 92%, transparent); }
+
+  /* ツールバー：表は2つ＋「その他」 */
+  .toolbar { border-top:none; padding-top:0; justify-content:flex-start; flex-wrap:nowrap; gap:.45rem; }
+  .chip {
+    border:1px solid var(--edge); background:var(--surface); color:var(--ink-soft); font-family:inherit;
+    font-size:.82rem; font-weight:600; padding:.45rem .9rem; min-height:40px; border-radius:999px;
+    cursor:pointer; white-space:nowrap; touch-action:manipulation; list-style:none;
+    display:inline-flex; align-items:center;
+  }
+  .chip::-webkit-details-marker { display:none; }
+  @media (hover: hover) { .chip:hover { border-color:var(--accent); color:var(--accent); } }
+  .more { position:relative; margin-left:auto; }
+  .more summary::after { content:""; width:.4rem; height:.4rem; margin-left:.5rem; border-right:1.5px solid currentColor; border-bottom:1.5px solid currentColor; transform:translateY(-2px) rotate(45deg); }
+  .more[open] summary { border-color:var(--accent); color:var(--accent); }
+  .more .menu {
+    position:absolute; right:0; top:calc(100% + .4rem); z-index:30; min-width:13rem;
+    background:var(--surface); border:1px solid var(--edge); border-radius:12px; box-shadow:var(--shadow);
+    padding:.35rem; display:flex; flex-direction:column;
+  }
+  .more .menu button {
+    border:none; background:none; text-align:left; font-family:inherit; font-size:.88rem; font-weight:500;
+    color:var(--ink); padding:.65rem .75rem; border-radius:8px; cursor:pointer; min-height:44px;
+  }
+  .more .menu button:hover { background:var(--accent-dim); }
+  .more .menu button.danger { color:var(--ng); border-top:1px solid var(--edge); border-radius:0 0 8px 8px; margin-top:.2rem; }
 
   /* ホーム */
-  .home h1 { font-weight:800; font-size:1.9rem; }
-  .home .eyebrow { font-weight:800; color:var(--accent); letter-spacing:.15em; }
+  .home { padding-top:3rem; }
+  .home .eyebrow { font-family:var(--font-num); font-weight:600; font-size:.7rem; color:var(--accent); letter-spacing:.24em; text-transform:uppercase; }
+  .home h1 { font-weight:700; font-size:1.75rem; letter-spacing:.02em; }
+  .who { gap:.75rem; }
   .who button {
-    border:none; border-radius:24px; color:#fff; padding:1.6rem .8rem 1.3rem;
-    box-shadow:0 6px 0 rgba(0,0,0,.18);
+    position:relative; overflow:hidden; border:1px solid var(--edge); border-radius:16px;
+    background:var(--surface); color:var(--ink); box-shadow:var(--shadow);
+    padding:1.4rem 1.1rem 1.2rem; align-items:flex-start; text-align:left; gap:.25rem;
+    transition:border-color .15s;
   }
-  .who button:active { transform:translateY(4px); box-shadow:0 2px 0 rgba(0,0,0,.18); }
-  .who button .ic { font-size:2.8rem; line-height:1; }
-  .who button b { font-weight:800; font-size:1.7rem; }
-  .who button span { color:rgba(255,255,255,.88); font-weight:700; }
-  .who button.p-ore { background:linear-gradient(150deg, #7B7BFF, #5B5BF0 60%, #4646C8); }
-  .who button.p-otouto { background:linear-gradient(150deg, #FFA15C, #FF7A2F 60%, #E85E14); }
-  .testbtn { border:2px solid var(--edge); border-left:2px solid var(--edge); border-radius:20px; padding:1.1rem 1.2rem; }
-  .testbtn:not(:disabled) { border-color:var(--accent); box-shadow:0 5px 0 color-mix(in srgb, var(--accent) 35%, transparent); }
-  .testbtn:not(:disabled):active { transform:translateY(3px); box-shadow:0 2px 0 color-mix(in srgb, var(--accent) 35%, transparent); }
-  .testbtn .nm { font-weight:800; font-size:1.3rem; }
-  .testbtn .nm::after { content:" ›"; color:var(--accent); }
-  .testbtn:disabled .nm::after { content:""; }
-  .testbtn .soon::before { content:"🛠 "; }
-  .resume { border-radius:999px; border:2px dashed var(--accent); font-weight:800; }
-  .homebtn { font-weight:800; }
+  .who button:active { transform:scale(.99); box-shadow:var(--shadow); }
+  .who button::before { content:""; position:absolute; left:0; top:0; right:0; height:4px; }
+  .who button.p-ore, .who button.p-otouto { background:var(--surface); }
+  .who button.p-ore::before { background:#1F5BD8; }
+  .who button.p-otouto::before { background:#1E8FE0; }
+  .who button .ic { display:none; }
+  .who button b { font-size:1.6rem; font-weight:700; }
+  .who button span { color:var(--ink-faint); font-weight:500; font-size:.78rem; }
+  .who button::after { content:"→"; position:absolute; right:1.1rem; bottom:1.1rem; color:var(--accent); font-weight:600; }
+  .testbtn { border-radius:16px; border:1px solid var(--edge); padding:1.1rem 1.2rem; transition:border-color .15s; }
+  .testbtn:not(:disabled) { border-color:var(--edge); box-shadow:var(--shadow); }
+  .testbtn:not(:disabled):active { transform:scale(.99); box-shadow:var(--shadow); }
+  .testbtn .nm { font-weight:700; font-size:1.2rem; }
+  .testbtn .nm::after { content:"  →"; color:var(--accent); }
+  .testbtn .soon::before { content:""; }
+  .testbtn .meta b { color:var(--accent); font-weight:600; }
+  .testbtn:disabled { opacity:.55; background:var(--surface2); }
+  .resume { border-radius:12px; border:1px solid var(--accent); background:var(--accent-dim); font-weight:600; }
+  @media (hover: hover) { .who button:hover, .testbtn:not(:disabled):hover { border-color:var(--accent); } }
+  .more .menu { top:auto; bottom:calc(100% + .4rem); }
+  .tab .cnt.bad { color:var(--ng); opacity:1; }
+  @media (max-width: 30rem) {
+    .tab { padding:.45rem .6rem; flex:1 0 auto; justify-content:center; }
+    .tab .cnt:not(.bad) { display:none; }
+  }
 </style>
 
 <div class="wrap">
@@ -545,7 +607,7 @@
   <!-- ============ ホーム：だれの → どのテスト ============ -->
   <div id="homeView" class="home">
     <div>
-      <p class="eyebrow">テスト対策</p>
+      <p class="eyebrow">Test Prep</p>
       <h1 id="homeTitle">だれのテスト？</h1>
     </div>
     <div class="who" id="whoList"></div>
@@ -567,6 +629,7 @@
       </div>
     </div>
     <div class="tabs" id="tabs" role="tablist"></div>
+    <div class="seg hidden" id="subtabs" role="tablist"></div>
   </header>
 
   <p class="memo hidden" id="deckMemo"></p>
@@ -655,17 +718,19 @@
       </div>
     </section>
 
+    <!-- よく使う2つだけ表に出し、残りは「その他」にしまう -->
     <div class="toolbar">
-      <div class="group">
-        <button class="btn-quiet" id="explainModeBtn">説明モード</button>
-        <button class="btn-quiet hidden" id="blankModeBtn">空欄だけ</button>
-        <button class="btn-quiet" id="restModeBtn">残りをやる</button>
-        <button class="btn-quiet" id="fixModeBtn">まちがい直し</button>
-        <button class="btn-quiet" id="allModeBtn">最初からやる</button>
-      </div>
-      <div class="group">
-        <button class="btn-quiet" id="resetBtn">この科目の記録を消す</button>
-      </div>
+      <button class="chip" id="restModeBtn">残りをやる</button>
+      <button class="chip" id="fixModeBtn">まちがい直し</button>
+      <details class="more" id="moreMenu">
+        <summary class="chip">その他</summary>
+        <div class="menu">
+          <button class="hidden" id="blankModeBtn">空欄だけ</button>
+          <button id="explainModeBtn">説明モード</button>
+          <button id="allModeBtn">最初からやる</button>
+          <button class="danger" id="resetBtn">この科目の記録を消す</button>
+        </div>
+      </details>
     </div>
 
     <p class="hint keys" id="keyHint"></p>
@@ -1359,7 +1424,7 @@ const DECKS_OTOUTO_2026_11 = (() => {
 ];
   const all = [...[
   {
-    id: "rika", ask: "あてはまるものは？", name: "理科", dir: "term",
+    id: "rika", group: "理科", sub: "", ask: "あてはまるものは？", name: "理科", dir: "term",
     memo: "範囲：単元1 第4章 化学変化と物質の質量・第5章 化学変化とその利用／単元2 生物のからだのつくりとはたらき（細胞・植物・消化・吸収・呼吸）。P.63〜137",
     cards: [
       // ---- 単元1 第4章 化学変化と物質の質量 ----
@@ -1451,7 +1516,7 @@ const DECKS_OTOUTO_2026_11 = (() => {
     ]
   },
   {
-    id: "chiri", ask: "あてはまるものは？", name: "社会（地理）", dir: "term",
+    id: "chiri", group: "社会", sub: "地理", ask: "あてはまるものは？", name: "社会（地理）", dir: "term",
     memo: "範囲：日本の地域的特色（P.156〜182）／九州地方（P.184〜195）／中部地方（P.220〜231 福井県を含む）／地域調査の手法（P.144〜155）／持続可能な地域の在り方（P.269〜279）。地理が60%",
     cards: [
       // ---- 地域調査の手法 ----
@@ -1561,7 +1626,7 @@ const DECKS_OTOUTO_2026_11 = (() => {
     ]
   },
   {
-    id: "rekishi", ask: "あてはまるものは？", name: "社会（歴史）", dir: "term",
+    id: "rekishi", group: "社会", sub: "歴史", ask: "あてはまるものは？", name: "社会（歴史）", dir: "term",
     memo: "範囲：第4章 近世の日本（P.98〜143）＝ヨーロッパ人の来航〜江戸幕府の政治改革。歴史が40%",
     cards: [
       // ---- ヨーロッパとの出会い ----
@@ -1675,17 +1740,17 @@ const DECKS_OTOUTO_2026_11 = (() => {
   }
 ], ...[
   {
-    id: "eitango", ask: "意味は？", name: "英単語（英→日）", dir: "meaning",
+    id: "eitango", group: "英語", sub: "英→日", ask: "意味は？", name: "英単語（英→日）", dir: "meaning",
     memo: "Unit3 What kind of job are you interested in?／Unit4 What is important in a homestay? まわりの単語。英単語を見て意味を選ぶ",
     cards: WORDS
   },
   {
-    id: "eitango2", ask: "英語にすると？", name: "英単語（日→英）", dir: "term",
+    id: "eitango2", group: "英語", sub: "日→英", ask: "英語にすると？", name: "英単語（日→英）", dir: "term",
     memo: "同じ単語を逆向きで。日本語を見て英単語を選ぶ（書けるようになる練習）",
     cards: WORDS
   },
   {
-    id: "eibun", ask: "この日本語に合う英文は？", name: "英語の表現", dir: "term",
+    id: "eibun", group: "英語", sub: "表現", ask: "この日本語に合う英文は？", name: "英語の表現", dir: "term",
     memo: "範囲表の「主な表現」（不定詞・have to・must・動名詞）。日本語に合う英文を選ぶ",
     cards: [
       { t:"I use a computer to study English.", m:"私は英語を勉強するためにコンピュータを使います。", src:"不定詞（副詞的用法）", fake:["I use a computer for study English.","I use a computer studying English.","I use a computer to studying English."] },
@@ -1711,7 +1776,59 @@ const DECKS_OTOUTO_2026_11 = (() => {
     ]
   },
   {
-    id: "sugaku", ask: "あてはまるものは？", name: "数学", dir: "term",
+    id: "keisan", group: "数学", sub: "計算", ask: "答えは？", name: "数学（計算）", dir: "term",
+    memo: "計算問題。紙に書いて解いてから選ぶこと。式の計算・式の値・等式の変形・連立方程式・一次関数",
+    cards: [
+      { t:"2x＋3y", m:"3x＋2y−x＋y ", src:"式の計算", fake:["4x＋3y","2x＋y","3x＋3y"] },
+      { t:"5a−b", m:"(3a−2b)＋(2a＋b) ", src:"式の計算", fake:["5a−3b","a−b","5a＋b"] },
+      { t:"a＋5b", m:"(3a＋2b)−(2a−3b) ", src:"式の計算", fake:["a−b","5a＋5b","a＋b"] },
+      { t:"6x−9y", m:"3(2x−3y) ", src:"式の計算", fake:["6x−3y","5x−6y","6x＋9y"] },
+      { t:"x−7y", m:"3(x−y)−2(x＋2y) ", src:"式の計算", fake:["x−y","5x−7y","x＋y"] },
+      { t:"−12ab", m:"3a×(−4b) ", src:"式の計算", fake:["12ab","−7ab","−12a＋b"] },
+      { t:"−3x", m:"12x²y÷(−4xy) ", src:"式の計算", fake:["3x","−3xy","−8x"] },
+      { t:"9a²", m:"(−3a)² ", src:"式の計算", fake:["−9a²","6a²","−6a"] },
+      { t:"(5x−y)/6", m:"(x＋y)/2＋(x−2y)/3 （通分）", src:"式の計算", fake:["(2x−y)/5","(5x＋y)/6","(5x−y)/5"] },
+      { t:"x＝3、y＝1", m:"x＋y＝4、x−y＝2 ", src:"連立方程式", fake:["x＝1、y＝3","x＝2、y＝2","x＝3、y＝−1"] },
+      { t:"x＝2、y＝1", m:"2x＋y＝5、x＋y＝3 ", src:"連立方程式", fake:["x＝1、y＝2","x＝2、y＝3","x＝3、y＝−1"] },
+      { t:"x＝1、y＝2", m:"3x＋2y＝7、x−2y＝−3 ", src:"連立方程式", fake:["x＝2、y＝1","x＝1、y＝−2","x＝−1、y＝5"] },
+      { t:"x＝2、y＝5", m:"y＝2x＋1、3x＋y＝11 （代入法）", src:"連立方程式", fake:["x＝5、y＝2","x＝2、y＝3","x＝1、y＝3"] },
+      { t:"x＝4、y＝−1", m:"2x＋3y＝5、x−y＝5 ", src:"連立方程式", fake:["x＝−1、y＝4","x＝4、y＝1","x＝2、y＝−3"] },
+      { t:"3x", m:"5x−2x", src:"式の計算", fake:["7x","3","−3x"] },
+      { t:"3a＋5b", m:"4a＋3b−a＋2b", src:"式の計算", fake:["5a＋5b","3a＋b","4a＋5b"] },
+      { t:"x²＋4x", m:"2x²＋3x−x²＋x", src:"式の計算", fake:["3x²＋4x","x²＋2x","5x³"] },
+      { t:"3x＋4y", m:"(4x＋y)−(x−3y)", src:"式の計算", fake:["3x−2y","5x＋4y","3x＋2y"] },
+      { t:"9a−b", m:"2(3a＋b)＋3(a−b)", src:"式の計算", fake:["9a＋5b","6a−b","9a−2b"] },
+      { t:"3x−2y", m:"5(x−y)−(2x−3y)", src:"式の計算", fake:["3x−8y","7x−2y","3x＋2y"] },
+      { t:"2x−3y", m:"(6x−9y)÷3", src:"式の計算", fake:["2x−9y","6x−3y","3x−6y"] },
+      { t:"6ab", m:"2a×3b", src:"式の計算", fake:["5ab","6a＋b","6a²b"] },
+      { t:"−10xy", m:"(−2x)×5y", src:"式の計算", fake:["10xy","3xy","−10x"] },
+      { t:"−12x²", m:"4x×(−3x)", src:"式の計算", fake:["12x²","−12x","x²"] },
+      { t:"4b", m:"8ab÷2a", src:"式の計算", fake:["4ab","6b","4a"] },
+      { t:"2x", m:"6x²÷3x", src:"式の計算", fake:["2x²","3x","2"] },
+      { t:"ab", m:"3a²b×2b÷6ab", src:"式の計算", fake:["a²b","b","6ab"] },
+      { t:"13", m:"x＝3、y＝−2 のとき 3x−2y の値", src:"式の値", fake:["5","−13","1"] },
+      { t:"−9", m:"a＝−1、b＝2 のとき 5a−2b の値", src:"式の値", fake:["1","9","−1"] },
+      { t:"4", m:"x＝−2 のとき x² の値", src:"式の値", fake:["−4","2","−2"] },
+      { t:"y＝−3x＋6", m:"3x＋y＝6 を y について解く", src:"等式の変形", fake:["y＝3x＋6","y＝3x−6","y＝−3x−6"] },
+      { t:"x＝(y＋4)/2", m:"2x−y＝4 を x について解く", src:"等式の変形", fake:["x＝(y−4)/2","x＝2y＋4","x＝(4−y)/2"] },
+      { t:"x＝4、y＝2", m:"x＋y＝6、x−y＝2", src:"連立方程式", fake:["x＝2、y＝4","x＝3、y＝3","x＝4、y＝−2"] },
+      { t:"x＝3、y＝5", m:"x＋y＝8、2x＋y＝11", src:"連立方程式", fake:["x＝5、y＝3","x＝3、y＝−5","x＝4、y＝4"] },
+      { t:"x＝3、y＝2", m:"3x−y＝7、x＋y＝5", src:"連立方程式", fake:["x＝2、y＝3","x＝3、y＝−2","x＝1、y＝4"] },
+      { t:"x＝3、y＝4", m:"y＝x＋1、x＋y＝7（代入法）", src:"連立方程式", fake:["x＝4、y＝3","x＝3、y＝−4","x＝2、y＝5"] },
+      { t:"x＝4、y＝1", m:"2x＋y＝9、x−y＝3", src:"連立方程式", fake:["x＝1、y＝4","x＝4、y＝−1","x＝3、y＝3"] },
+      { t:"x＝6、y＝3", m:"x＝2y、x＋y＝9（代入法）", src:"連立方程式", fake:["x＝3、y＝6","x＝6、y＝−3","x＝4、y＝5"] },
+      { t:"x＝2、y＝3", m:"2x＋3y＝13、2x−y＝1", src:"連立方程式", fake:["x＝3、y＝2","x＝2、y＝−3","x＝5、y＝1"] },
+      { t:"y＝7", m:"y＝2x＋1 で x＝3 のときの y", src:"一次関数", fake:["y＝6","y＝5","y＝8"] },
+      { t:"y＝−1", m:"y＝−3x＋5 で x＝2 のときの y", src:"一次関数", fake:["y＝11","y＝1","y＝−11"] },
+      { t:"x＝3", m:"y＝4x−3 で y＝9 のときの x", src:"一次関数", fake:["x＝33","x＝6","x＝3/2"] },
+      { t:"2", m:"2点 (0, 1)、(2, 5) を通る直線の傾き", src:"一次関数", fake:["4","3","1/2"] },
+      { t:"−2", m:"y＝−2x＋3 の変化の割合", src:"一次関数", fake:["3","2","−3"] },
+      { t:"(2, 4)", m:"y＝x＋2 と y＝−x＋6 の交点", src:"一次関数", fake:["(4, 2)","(2, 8)","(−2, 0)"] },
+      { t:"y＝3x＋2", m:"傾き3で点 (1, 5) を通る直線の式", src:"一次関数", fake:["y＝3x＋5","y＝3x−2","y＝5x＋3"] }
+    ]
+  },
+  {
+    id: "sugaku", group: "数学", sub: "用語・グラフ", ask: "あてはまるものは？", name: "数学", dir: "term",
     memo: "範囲：1章 式の計算・2章 連立方程式（P.12〜59）50%／3章 一次関数（P.60〜95）50%。用語と計算。計算は紙に書いてから選ぶこと",
     cards: [
       // ---- 式の計算：用語 ----
@@ -1723,16 +1840,6 @@ const DECKS_OTOUTO_2026_11 = (() => {
       { t:"係数", m:"文字をふくむ項の、数の部分。", src:"式の計算（用語）", cf:["次数","項"] },
       { t:"3次式", m:"単項式 −4a²b は何次式か。", src:"式の計算（用語）", fake:["2次式","4次式","1次式"] },
       { t:"2次式", m:"x²＋3xy−5 は何次式か。", src:"式の計算（用語）", fake:["1次式","3次式","4次式"] },
-      // ---- 式の計算：計算 ----
-      { t:"2x＋3y", m:"3x＋2y−x＋y を計算すると？", src:"式の計算（計算）", fake:["4x＋3y","2x＋y","3x＋3y"] },
-      { t:"5a−b", m:"(3a−2b)＋(2a＋b) を計算すると？", src:"式の計算（計算）", fake:["5a−3b","a−b","5a＋b"] },
-      { t:"a＋5b", m:"(3a＋2b)−(2a−3b) を計算すると？", src:"式の計算（計算）", fake:["a−b","5a＋5b","a＋b"] },
-      { t:"6x−9y", m:"3(2x−3y) を計算すると？", src:"式の計算（計算）", fake:["6x−3y","5x−6y","6x＋9y"] },
-      { t:"x−7y", m:"3(x−y)−2(x＋2y) を計算すると？", src:"式の計算（計算）", fake:["x−y","5x−7y","x＋y"] },
-      { t:"−12ab", m:"3a×(−4b) を計算すると？", src:"式の計算（計算）", fake:["12ab","−7ab","−12a＋b"] },
-      { t:"−3x", m:"12x²y÷(−4xy) を計算すると？", src:"式の計算（計算）", fake:["3x","−3xy","−8x"] },
-      { t:"9a²", m:"(−3a)² を計算すると？", src:"式の計算（計算）", fake:["−9a²","6a²","−6a"] },
-      { t:"(5x−y)/6", m:"(x＋y)/2＋(x−2y)/3 を計算すると？（通分する）", src:"式の計算（計算）", fake:["(2x−y)/5","(5x＋y)/6","(5x−y)/5"] },
       { t:"−1", m:"x＝2、y＝−3 のとき、2x＋y の値は？", src:"式の計算（式の値）", fake:["1","7","−7"] },
       { t:"y＝(7−2x)/3", m:"2x＋3y＝7 を y について解くと？", src:"式の計算（等式の変形）", fake:["y＝7−2x/3","y＝(2x−7)/3","y＝(7＋2x)/3"] },
       { t:"h＝2S/a", m:"S＝ah/2 を h について解くと？", src:"式の計算（等式の変形）", fake:["h＝S/2a","h＝2a/S","h＝aS/2"] },
@@ -1742,11 +1849,6 @@ const DECKS_OTOUTO_2026_11 = (() => {
       { t:"連立方程式", m:"2つ以上の方程式を組にしたもの。", src:"連立方程式（用語）" },
       { t:"加減法", m:"左辺どうし、右辺どうしを加えたりひいたりして、1つの文字を消去する解き方。", src:"連立方程式（用語）", cf:["代入法"] },
       { t:"代入法", m:"一方の式を他方の式に代入して、1つの文字を消去する解き方。", src:"連立方程式（用語）", cf:["加減法"] },
-      { t:"x＝3、y＝1", m:"x＋y＝4、x−y＝2 を解くと？", src:"連立方程式（計算）", fake:["x＝1、y＝3","x＝2、y＝2","x＝3、y＝−1"] },
-      { t:"x＝2、y＝1", m:"2x＋y＝5、x＋y＝3 を解くと？", src:"連立方程式（計算）", fake:["x＝1、y＝2","x＝2、y＝3","x＝3、y＝−1"] },
-      { t:"x＝1、y＝2", m:"3x＋2y＝7、x−2y＝−3 を解くと？", src:"連立方程式（計算）", fake:["x＝2、y＝1","x＝1、y＝−2","x＝−1、y＝5"] },
-      { t:"x＝2、y＝5", m:"y＝2x＋1、3x＋y＝11 を解くと？（代入法）", src:"連立方程式（計算）", fake:["x＝5、y＝2","x＝2、y＝3","x＝1、y＝3"] },
-      { t:"x＝4、y＝−1", m:"2x＋3y＝5、x−y＝5 を解くと？", src:"連立方程式（計算）", fake:["x＝−1、y＝4","x＝4、y＝1","x＝2、y＝−3"] },
       { t:"x＋y＝10、50x＋80y＝620", m:"1個50円のパンと1個80円のパンを合わせて10個買い、620円だった。50円のパンをx個、80円のパンをy個として立てる式は？", src:"連立方程式（文章題）", fake:["x＋y＝620、50x＋80y＝10","x＋y＝10、80x＋50y＝620","x−y＝10、50x＋80y＝620"] },
       { t:"6個", m:"上の問題（50円と80円のパンを合わせて10個で620円）で、50円のパンの個数は？", src:"連立方程式（文章題）", fake:["4個","5個","7個"] },
       // ---- 一次関数 ----
@@ -1771,7 +1873,7 @@ const DECKS_OTOUTO_2026_11 = (() => {
     ]
   },
   {
-    id: "kanji", ask: "カタカナを漢字にすると？", name: "漢字（書き）", dir: "term",
+    id: "kanji", group: "国語", sub: "漢字 書き", ask: "カタカナを漢字にすると？", name: "漢字（書き）", dir: "term",
     memo: "カタカナの部分を漢字にすると？ 光村「国語2」〜P.120の教材と「漢字に親しもう」まわりの中2の漢字（予想）。似た字のひっかけに注意",
     cards: [
       { t:"傾", m:"首をカタムける", src:"アイスプラネット", fake:["頃","項","額"] },
@@ -1826,7 +1928,7 @@ const DECKS_OTOUTO_2026_11 = (() => {
     ]
   },
   {
-    id: "yomi", ask: "読み方は？", name: "漢字（読み）", dir: "meaning",
+    id: "yomi", group: "国語", sub: "漢字 読み", ask: "読み方は？", name: "漢字（読み）", dir: "meaning",
     memo: "漢字の読み方を選ぶ。教科書の教材と中2でよく出る読み（予想）",
     cards: [
       { t:"吹聴", m:"ふいちょう", src:"アイスプラネット", fake:["すいちょう","ふきちょう","ふいてい"] },
@@ -1853,7 +1955,7 @@ const DECKS_OTOUTO_2026_11 = (() => {
     ]
   },
   {
-    id: "kokugo", ask: "あてはまるものは？", name: "国語（知識・文法）", dir: "term",
+    id: "kokugo", group: "国語", sub: "知識・文法", ask: "あてはまるものは？", name: "国語（知識・文法）", dir: "term",
     memo: "短歌の知識・熟語の構成・類義語/対義語・文法（単語の分け方と品詞）。範囲：光村〜P.120（説明的文章・随筆・短歌）",
     cards: [
       // ---- 短歌 ----
@@ -1924,7 +2026,7 @@ const DECKS_OTOUTO_2026_11 = (() => {
     ]
   }
 ]];
-  const order = ["kanji","yomi","kokugo","eitango","eitango2","eibun","sugaku","chiri","rekishi","rika"];
+  const order = ["kanji","yomi","kokugo","eitango","eitango2","eibun","keisan","sugaku","chiri","rekishi","rika"];
   return order.map(id => all.find(d => d.id === id));
 })();
 /*@@OTOUTO_END@@*/
@@ -2308,7 +2410,7 @@ function showQuestion() {
     mode === "fix"     ? "まちがい直し" :
     mode === "blank"   ? "空欄の残り"   :
     mode === "rest"    ? "残りだけ"     :
-    mode === "explain" ? "説明モード"   : dirLabel;
+    mode === "explain" ? "説明モード"   : d.group ? "全問" : dirLabel;
   $("modeLabel").classList.toggle("fix", mode === "fix");
   $("counter").textContent = `${Math.min(qi+1, queue.length)} / ${queue.length}`;
   $("barFill").style.width = queue.length ? (qi / queue.length * 100) + "%" : "0%";
@@ -2420,22 +2522,56 @@ function showDone() {
 }
 
 /* ---------------------------- タブ ---------------------------- */
+// 上段＝教科（group）、下段＝その教科の中の切り替え（sub：漢字 書き／読み、英→日／日→英 など）。
+// group のないデッキ（俺の大学の科目）は1デッキ＝1教科として扱い、下段は出さない
+const groupOf = d => d.group || d.name;
+const lastSub = {};   // 教科ごとに、最後に開いていた切り替え先を覚えておく
+function openDeck(n) {
+  deckIdx = n;
+  lastSub[groupOf(DECKS[n])] = n;
+  resumeOrBuild(); renderTabs();
+  if (!$("statsView").classList.contains("hidden")) renderStats();
+}
 function renderTabs() {
   const box = $("tabs");
   box.innerHTML = "";
+  const groups = [];
   DECKS.forEach((d, n) => {
-    const bad = d.cards.filter((_,i) => (stats[d.id]?.[i]?.pending)).length;
+    let g = groups.find(x => x.name === groupOf(d));
+    if (!g) groups.push(g = { name: groupOf(d), idxs: [] });
+    g.idxs.push(n);
+  });
+  const cur = groupOf(deck());
+  const badOf = d => d.cards.filter((_,i) => (stats[d.id]?.[i]?.pending)).length;
+  groups.forEach(g => {
+    const ds = g.idxs.map(n => DECKS[n]);
+    const bad = ds.reduce((a, d) => a + badOf(d), 0);
+    const nb = ds.reduce((a, d) => a + blankCount(d), 0);
+    const all = ds.reduce((a, d) => a + d.cards.length, 0);
     const b = document.createElement("button");
     b.className = "tab";
     b.setAttribute("role", "tab");
-    b.setAttribute("aria-selected", n === deckIdx);
-    const nb = blankCount(d);
-    b.innerHTML = `${esc(d.name)}<span class="cnt">${bad ? "×" + bad : nb ? "空欄" + nb : d.cards.length + "問"}</span>`;
-    // 科目を移ってもその科目の続きから。初めての科目なら新しく組む
-    b.onclick = () => { deckIdx = n; resumeOrBuild(); renderTabs(); if (!$("statsView").classList.contains("hidden")) renderStats(); };
+    b.setAttribute("aria-selected", g.name === cur);
+    b.innerHTML = `${esc(g.name)}<span class="cnt${bad ? " bad" : ""}">${bad ? "×" + bad : nb ? "空欄" + nb : all}</span>`;
+    // 教科を移ってもその教科の続きから。前に開いていた切り替え先を優先
+    b.onclick = () => openDeck(lastSub[g.name] ?? g.idxs[0]);
     box.appendChild(b);
   });
-  $("deckTitle").textContent = deck().name;
+
+  const g = groups.find(x => x.name === cur);
+  const seg = $("subtabs");
+  seg.innerHTML = "";
+  seg.classList.toggle("hidden", g.idxs.length < 2);
+  if (g.idxs.length > 1) g.idxs.forEach(n => {
+    const d = DECKS[n], bad = badOf(d);
+    const b = document.createElement("button");
+    b.setAttribute("role", "tab");
+    b.setAttribute("aria-selected", n === deckIdx);
+    b.innerHTML = `${esc(d.sub || d.name)}${bad ? `<span class="cnt">×${bad}</span>` : ""}`;
+    b.onclick = () => openDeck(n);
+    seg.appendChild(b);
+  });
+  $("deckTitle").textContent = deck().group ? deck().group + (deck().sub ? "　" + deck().sub : "") : deck().name;
   const memo = deck().memo;
   $("deckMemo").textContent = memo || "";
   $("deckMemo").classList.toggle("hidden", !memo);
@@ -2763,7 +2899,7 @@ function showHome(pid) {
 
   // 1段目：だれのテスト？
   if (!p) {
-    $("homeTitle").textContent = "だれのテスト？👀";
+    $("homeTitle").textContent = "だれのテスト？";
     $("whoList").innerHTML = "";
     PEOPLE.forEach(x => {
       const b = document.createElement("button");
@@ -2777,7 +2913,7 @@ function showHome(pid) {
     const lp = PEOPLE.find(x => x.id === h.p), lt = lp?.tests.find(t => t.id === h.t);
     $("resumeBtn").classList.toggle("hidden", !(lt && lt.decks.length));
     if (lt && lt.decks.length) {
-      $("resumeBtn").textContent = `前回のつづき：${lp.name}／${lt.name}　›`;
+      $("resumeBtn").textContent = `前回のつづき：${lp.name}／${lt.name}　→`;
       $("resumeBtn").onclick = () => openTest(lp, lt);
     }
     return;
@@ -2785,7 +2921,7 @@ function showHome(pid) {
 
   // 2段目：どのテスト？
   $("resumeBtn").classList.add("hidden");
-  $("homeTitle").textContent = `${p.icon} ${p.name}のテスト`;
+  $("homeTitle").textContent = `${p.name}のテスト`;
   const box = $("testList");
   box.innerHTML = "";
   p.tests.forEach(t => {
@@ -2811,6 +2947,7 @@ function showHome(pid) {
 function openTest(p, t) {
   person = p; test = t; DECKS = t.decks;
   document.body.dataset.who = p.id;
+  Object.keys(lastSub).forEach(k => delete lastSub[k]);
   STORE = keyFor(p, t, "v2");
   SESS_STORE = keyFor(p, t, "sess");
   stats = load();
@@ -2829,6 +2966,11 @@ function openTest(p, t) {
 }
 
 $("homeBtn").onclick = () => showHome(person?.id);
+// 「その他」メニューは、中のボタンを押したら／外をタップしたら閉じる
+document.addEventListener("click", e => {
+  const m = $("moreMenu");
+  if (m.open && (!m.contains(e.target) || e.target.closest(".menu button"))) m.open = false;
+});
 $("whoBack").onclick = () => showHome();
 showHome();
 </script>
